@@ -186,12 +186,12 @@ int main(void)
     //     }
     // }
 
-    //Move forward 7 inches
-        move_forward(25, 238.185);
+        //Move forward
+        move_forward(25, 145);
 
         //Make a slight turn left
-        turn_left(25, 120);
+        turn_left(25, 115);
 
-        //Move forward 12 inches
-        move_forward(25, 404.89);
+        //Move forward
+        move_forward(25, 120);
 }
