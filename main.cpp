@@ -176,91 +176,65 @@ int main(void)
     //Initialize testing speed
     int testSpeed = 25;
 
-    // //Check the starting light if it's red
-    // if (cds.Value() > 0.25 && cds.Value() < 0.5){
+    while (cds.Value() <= 0.25 || cds.Value() >= 0.5) {
+        left_motor.Stop();
+        right_motor.Stop();
+        LCD.WriteLine(cds.Value());
+        Sleep(0.5);
+    }
 
-    //     //Move forward
-    //     move_forward(testSpeed, 145);
+    //Move forward
+    move_forward(testSpeed, 145);
 
-    //     //Make a slight turn left
-    //     turn_left(testSpeed, 115);
+    //Make a slight turn left
+    turn_left(testSpeed, 115);
 
-    //     //Move forward
-    //     move_forward(testSpeed, 120);
-
-    // }
-
-    // //Check if light is red
-    // if (cds.Value() > 0.25 && cds.Value() < 0.5) {
-    //     move_forward(testSpeed, 50); //Move closer to the red button
-    //     turn_left(testSpeed, 200); //make a 90 degree turn left to face the button
-    //     lineTracking(15, 6.9); //track the line in front to the button
-    //     move_backward(testSpeed, 50); //move back from the button 
-    //     turn_left(testSpeed, 200); //make a 90 degree turn left
-    //     move_forward(testSpeed, 130); //move closer to the ramp
-    // }
-
-    // //Check if light is blue
-    // else if (cds.Value() > 1.75 && cds.Value() < 2.5){
-    //     move_backward(testSpeed, 50); //Move closer to the red button
-    //     turn_left(testSpeed, 200); //make a 90 degree turn left to face the button
-    //     lineTracking(testSpeed, 6.9); //track the line in front to the button
-    //     move_backward(testSpeed, 50); //move back from the button
-    //     turn_left(testSpeed, 200); //make a 90 degree turn left
-    //     move_forward(testSpeed, 120); //move closer to the ramp
-    // }
-
-    // turn_left(testSpeed, 200); //turn left to face the ramp
-    // move_forward(testSpeed, 150); //move up the ramp
-    // move_backward(testSpeed, 150); //move down the ramp
+    //Move forward
+    move_forward(testSpeed, 120);
 
 
+    //Check if light is red
+    if (cds.Value() > 0.25 && cds.Value() < 0.5) {
+        move_forward(testSpeed, 50); //Move closer to the red button
+        int turnCounts = 0;
+        while (left_opt.Value() < 2){
+            turn_left(testSpeed, turnCounts);
+            turnCounts++;
+        }
+        move_backward(testSpeed, 50); //move back from the button 
+        turn_left(testSpeed, 200); //make a 90 degree turn left
+        move_forward(testSpeed, 130); //move closer to the ramp
+    }
+
+    //Check if light is blue
+    else if (cds.Value() > 1.75 && cds.Value() < 2.5){
+        move_backward(testSpeed, 50); //Move closer to the red button
+        int turnCounts = 0;
+        while (left_opt.Value() < 2){
+            turn_left(testSpeed, turnCounts);
+            turnCounts++;
+        }
+        move_backward(testSpeed, 50); //move back from the button
+        turn_left(testSpeed, 200); //make a 90 degree turn left
+        move_forward(testSpeed, 120); //move closer to the ramp
+    }
+
+    turn_left(testSpeed, 200); //turn left to face the ramp
+    move_forward(testSpeed, 150); //move up the ramp
+    move_backward(testSpeed, 150); //move down the ramp
 
 
-    // while (cds.Value() <= 0.25 || cds.Value() >= 0.5) {
-    //     left_motor.Stop();
-    //     right_motor.Stop();
-    //     LCD.WriteLine(cds.Value());
+
+
+
+    // while (true) {
+    //     LCD.Write(left_opt.Value());
+    //     LCD.Write("\t");
+    //     LCD.Write(middle_opt.Value());
+    //     LCD.Write("\t");
+    //     LCD.Write(right_opt.Value());
+    //     LCD.Write("\n");
     //     Sleep(0.5);
     // }
 
-    // //Move forward
-    // move_forward(testSpeed, 145);
-
-    // //Make a slight turn left
-    // turn_left(testSpeed, 115);
-
-    // //Move forward
-    // move_forward(testSpeed, 120);
-
-    // //Check if light is red
-    // if (cds.Value() > 0.25 && cds.Value() < 0.5) {
-    //     move_forward(testSpeed, 50); //Move closer to the red button
-    //     turn_left(testSpeed, 200); //make a 90 degree turn left to face the button
-    //     turn_left(testSpeed, 200); //make a 90 degree turn left
-    //     move_forward(testSpeed, 130); //move closer to the ramp
-    // }
-
-    // //Check if light is blue
-    // else if (cds.Value() > 1.75 && cds.Value() < 2.5){
-    //     move_backward(testSpeed, 50); //Move closer to the red button
-    //     turn_left(testSpeed, 200); //make a 90 degree turn left to face the button
-    //     turn_left(testSpeed, 200); //make a 90 degree turn left
-    //     move_forward(testSpeed, 120); //move closer to the ramp
-    // }
-
-    // turn_left(testSpeed, 200); //turn left to face the ramp
-    // move_forward(testSpeed, 150); //move up the ramp
-    // move_backward(testSpeed, 150); //move down the ramp
-
-
-    while (true) {
-        LCD.Write(left_opt.Value());
-        LCD.Write("\t");
-        LCD.Write(middle_opt.Value());
-        LCD.Write("\t");
-        LCD.Write(right_opt.Value());
-        LCD.Write("\n");
-        Sleep(0.5);
-    }
 }
