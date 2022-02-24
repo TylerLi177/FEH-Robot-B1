@@ -201,6 +201,10 @@ int main(void)
             turn_left(testSpeed, turnCounts);
             turnCounts++;
         }
+        float timeNow = TimeNow();
+        while (TimeNow() - timeNow < 5){
+            lineTracking(15, 6.9);
+        }
         move_backward(testSpeed, 50); //move back from the button 
         turn_left(testSpeed, 200); //make a 90 degree turn left
         move_forward(testSpeed, 130); //move closer to the ramp
@@ -213,6 +217,10 @@ int main(void)
         while (left_opt.Value() < 2){
             turn_left(testSpeed, turnCounts);
             turnCounts++;
+        }
+        float timeNow = TimeNow();
+        while (TimeNow() - timeNow < 5){
+            lineTracking(15, 6.9);
         }
         move_backward(testSpeed, 50); //move back from the button
         turn_left(testSpeed, 200); //make a 90 degree turn left
