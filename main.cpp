@@ -142,7 +142,7 @@ void lineTracking(float fast_motor_percent, float slow_motor_percent){
     LCD.Write("Sexy\n");
 
     //See if the left and middle sensor are off the track
-    while (left_opt.Value() <= 1.2 && middle_opt.Value() <= 0.85) {
+    while (left_opt.Value() <= 0.8 && middle_opt.Value() <= 0.3) {
 
         //Set the right wheel to go slower
         left_motor.SetPercent(-1 * fast_motor_percent);
@@ -152,20 +152,20 @@ void lineTracking(float fast_motor_percent, float slow_motor_percent){
         LCD.Write("Going Right\n");
 
         //Stop moving right if the middle sensor is over the track
-        if (middle_opt.Value() >= 2) {
+        if (middle_opt.Value() >= 1.5) {
             break;
         }
     }
 
     //See if the middle and right sensor are off the track
-    while (middle_opt.Value() <= 0.85 && right_opt.Value() <= 1.1) {
+    while (middle_opt.Value() <= 0.3 && right_opt.Value() <= 1.2) {
         left_motor.SetPercent(-1 * slow_motor_percent);
         right_motor.SetPercent(fast_motor_percent);
 
         LCD.Write("Going Left\n");
 
         //Stop moving right if the middle sensor is over the track
-        if (middle_opt.Value() >= 2) {
+        if (middle_opt.Value() >= 1.5) {
             break;
         }
     }
@@ -176,7 +176,8 @@ int main(void)
     //Initialize testing speed
     int testSpeed = 25;
 
-    while (cds.Value() <= 0.25 || cds.Value() >= 0.5) {
+    //Check if the starting light is not red
+    while (cds.Value() <= 0.3 || cds.Value() >= 0.7) {
         left_motor.Stop();
         right_motor.Stop();
         LCD.WriteLine(cds.Value());
@@ -184,65 +185,47 @@ int main(void)
     }
 
     //Move forward
-    move_forward(testSpeed, 145);
+    move_forward(testSpeed, 200);
 
     //Make a slight turn left
-    turn_left(testSpeed, 115);
+    turn_left(testSpeed, 135);
 
     //Move forward
-    move_forward(testSpeed, 120);
+    move_forward(testSpeed, 250);
 
+    Sleep(1.0);
 
     //Check if light is red
-    if (cds.Value() > 0.25 && cds.Value() < 0.5) {
+    if (cds.Value() > 0.3 && cds.Value() < 0.7) {
         move_forward(testSpeed, 50); //Move closer to the red button
-        int turnCounts = 0;
-        while (left_opt.Value() < 2){
-            turn_left(testSpeed, turnCounts);
-            turnCounts++;
-        }
-        float timeNow = TimeNow();
-        while (TimeNow() - timeNow < 5){
-            lineTracking(15, 6.9);
-        }
+        turn_left(testSpeed, 240); //make a 90 degree turn left
+        move_forward(testSpeed, 50); //press the button
         move_backward(testSpeed, 50); //move back from the button 
-        turn_left(testSpeed, 200); //make a 90 degree turn left
+        turn_left(testSpeed, 240); //make a 90 degree turn left
         move_forward(testSpeed, 130); //move closer to the ramp
     }
 
     //Check if light is blue
-    else if (cds.Value() > 1.75 && cds.Value() < 2.5){
+    else if (cds.Value() > 0.9 && cds.Value() < 1.2){
         move_backward(testSpeed, 50); //Move closer to the red button
-        int turnCounts = 0;
-        while (left_opt.Value() < 2){
-            turn_left(testSpeed, turnCounts);
-            turnCounts++;
-        }
-        float timeNow = TimeNow();
-        while (TimeNow() - timeNow < 5){
-            lineTracking(15, 6.9);
-        }
+        turn_left(testSpeed, 240); //make a 90 degree turn left
+        move_forward(testSpeed, 50); //press the button
         move_backward(testSpeed, 50); //move back from the button
-        turn_left(testSpeed, 200); //make a 90 degree turn left
+        turn_left(testSpeed, 240); //make a 90 degree turn left
         move_forward(testSpeed, 120); //move closer to the ramp
     }
 
-    turn_left(testSpeed, 200); //turn left to face the ramp
+    else {
+        left_motor.Stop();
+        right_motor.Stop();
+        LCD.WriteLine("You\'re a failure");
+        Sleep(5.0);
+    }
+
+    turn_left(testSpeed, 240); //turn left to face the ramp
     move_forward(testSpeed, 150); //move up the ramp
     move_backward(testSpeed, 150); //move down the ramp
 
-
-
-
-
-    // while (true) {
-    //     LCD.Write(left_opt.Value());
-    //     LCD.Write("\t");
-    //     LCD.Write(middle_opt.Value());
-    //     LCD.Write("\t");
-    //     LCD.Write(right_opt.Value());
-    //     LCD.Write("\n");
-    //     Sleep(0.5);
-    // }
+    LCD.WriteLine("Hell yeah");
 
 }
