@@ -68,6 +68,39 @@ void move_backward(int percent, int counts) //using encoders
     left_motor.Stop();
 }
 
+void turn_left(int percent, int counts) //using encoders
+{
+
+//Reset encoder counts
+
+right_encoder.ResetCounts();
+
+left_encoder.ResetCounts();
+
+//Set both motors to desired percent
+
+left_motor.SetPercent(percent);
+right_motor.SetPercent(percent);
+
+//While the average of the left and right encoder is less than counts,
+
+//keep running motors
+
+while (((left_encoder.Counts() + right_encoder.Counts()) / 2) < counts) {
+    LCD.WriteLine("Left");
+    Sleep(0.5);
+    left_motor.SetPercent(percent);
+    right_motor.SetPercent(percent);
+}
+
+//Turn off motors
+
+right_motor.Stop();
+
+left_motor.Stop();
+
+}
+
 void turn_right(int percent, int counts) //using encoders
 {
 
@@ -89,39 +122,6 @@ right_motor.SetPercent(percent);
 
 while (((left_encoder.Counts() + right_encoder.Counts()) / 2) < counts) {
     LCD.WriteLine("Right");
-    Sleep(0.5);
-    left_motor.SetPercent(percent);
-    right_motor.SetPercent(percent);
-}
-
-//Turn off motors
-
-right_motor.Stop();
-
-left_motor.Stop();
-
-}
-
-void turn_left(int percent, int counts) //using encoders
-{
-
-//Reset encoder counts
-
-right_encoder.ResetCounts();
-
-left_encoder.ResetCounts();
-
-//Set both motors to desired percent
-
-left_motor.SetPercent(percent);
-right_motor.SetPercent(percent);
-
-//While the average of the left and right encoder is less than counts,
-
-//keep running motors
-
-while (((left_encoder.Counts() + right_encoder.Counts()) / 2) < counts) {
-    LCD.WriteLine("Left");
     Sleep(0.5);
     left_motor.SetPercent(percent);
     right_motor.SetPercent(percent);
@@ -196,79 +196,55 @@ int main(void)
     Sleep(1.0);
 
     //Move forward
-    move_forward(testSpeed, 270);
+    move_forward(testSpeed, 260);
 
-    Sleep(1.0);
+    //Check if the light is red
+    if (cds.Value() > 0.3 && cds.Value() < 0.7){
+        left_motor.Stop();
+        right_motor.Stop();
+        LCD.WriteLine("RED detected");
+        turn_left(testSpeed, ninetyDegreeCount); //Make a 90 degree turn 
+        Sleep(1.0);
+        move_forward(testSpeed, 10); //press the button
+        Sleep(1.0);
+        move_backward(testSpeed, 50); //move back from the button 
+        Sleep(1.0);
+        turn_left(testSpeed, ninetyDegreeCount); //make a 90 degree turn left
+        Sleep(1.0);
+    }
 
-    LCD.WriteLine("RED");
+    //Check if light is blue
+    else if (cds.Value() > 0.8 && cds.Value() < 1.2){
+        left_motor.Stop();
+        right_motor.Stop();
+        LCD.WriteLine("BLUE detected");
+        Sleep(1.0);
+        turn_left(testSpeed, ninetyDegreeCount); //make a 90 degree turn left
+        Sleep(1.0);
+        move_forward(testSpeed, 10); //press the button
+        Sleep(1.0);
+        move_backward(testSpeed, 50); //move back from the button
+        Sleep(1.0);
+        turn_left(testSpeed, ninetyDegreeCount); //make a 90 degree turn left
+        Sleep(1.0);
+    }
 
-    turn_left(testSpeed, ninetyDegreeCount);
+    else {
+        LCD.WriteLine("RED");
+        left_motor.Stop();
+        right_motor.Stop();
+    } 
 
-    move_forward(50, 25);
-
-    move_backward(testSpeed, 50); //move back from the button
-    Sleep(1.0);
-    turn_left(testSpeed, ninetyDegreeCount); //make a 90 degree turn left
-    Sleep(1.0);
-
-    // //Check if light is not red or blue
-
-    // float light_detected = TimeNow();
-    // left_motor.SetPercent(-1 * testSpeed);
-    // right_motor.SetPercent(testSpeed);
-
-    // while (TimeNow()-light_detected <= 4.00) {
-
-    //     if (cds.Value() > 0.3 && cds.Value() < 1.2){
-
-    //         left_motor.Stop();
-    //         right_motor.Stop();
-
-    //         Sleep(1.0);
-
-    //         //Check if light is red
-    //         if (cds.Value() > 0.3 && cds.Value() < 0.7){
-    //             LCD.WriteLine("RED detected");
-    //             move_forward(testSpeed, 1);
-    //             turn_left(testSpeed, ninetyDegreeCount); //Make a 90 degree turn 
-    //             Sleep(1.0);
-    //             move_forward(testSpeed, 10); //press the button
-    //             Sleep(1.0);
-    //             move_backward(testSpeed, 50); //move back from the button 
-    //             Sleep(1.0);
-    //             turn_left(testSpeed, ninetyDegreeCount); //make a 90 degree turn left
-    //             Sleep(1.0);
-    //         }
-
-    //         //Check if light is blue
-    //         else if (cds.Value() > 0.8 && cds.Value() < 1.2){
-    //             LCD.WriteLine("BLUE detected");
-    //             Sleep(1.0);
-    //             turn_left(testSpeed, ninetyDegreeCount); //make a 90 degree turn left
-    //             Sleep(1.0);
-    //             move_forward(testSpeed, 10); //press the button
-    //             Sleep(1.0);
-    //             move_backward(testSpeed, 50); //move back from the button
-    //             Sleep(1.0);
-    //             turn_left(testSpeed, ninetyDegreeCount); //make a 90 degree turn left
-    //             Sleep(1.0);
-    //         }
-
-    //         else {
-    //             LCD.WriteLine("RED");
-    //             left_motor.Stop();
-    //             right_motor.Stop();
-    //         } 
-    //     }
-    // }
-
-    left_motor.Stop();
-    right_motor.Stop();
+    move_forward(testSpeed, 100); //Move close to the ramp
 
     turn_left(testSpeed, ninetyDegreeCount); //turn left to face the ramp
+    
     Sleep(1.0);
+
     move_forward(testSpeed, 1000); //move up the ramp
+
     Sleep(1.0);
+    
     move_backward(testSpeed, 1000); //move down the ramp
 
     Sleep(1.0);
