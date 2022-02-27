@@ -174,8 +174,8 @@ void lineTracking(float fast_motor_percent, float slow_motor_percent){
 int main(void)
 {
     //Initialize testing speed
-    int testSpeed = 50;
-    int ninetyDegreeCount = 225;
+    int testSpeed = 25;
+    int ninetyDegreeCount = 265;
 
     //Check if the starting light is not red
     while (cds.Value() <= 0.3 || cds.Value() >= 0.7) {
@@ -186,66 +186,90 @@ int main(void)
     }
 
     //Move forward
-    move_forward(testSpeed, 160);
+    move_forward(testSpeed, 240);
 
     Sleep(1.0);
 
     //Make a slight turn left
-    turn_left(testSpeed, 170);
+    turn_left(testSpeed, 135);
 
     Sleep(1.0);
 
     //Move forward
-    move_forward(testSpeed, 185);
+    move_forward(testSpeed, 270);
 
     Sleep(1.0);
 
-    //Check if light is red
-    if (cds.Value() > 0.3 && cds.Value() < 0.7) {
-        //move_forward(testSpeed, 10); //Move closer to the red button
-        //Sleep(1.0);
+    LCD.WriteLine("RED");
 
-        //Make a 90 degree turn 
-        turn_left(testSpeed, ninetyDegreeCount);
-        Sleep(1.0);
-        move_forward(testSpeed, 10); //press the button
-        Sleep(1.0);
-        move_backward(testSpeed, 25); //move back from the button 
-        Sleep(1.0);
-        turn_left(testSpeed, ninetyDegreeCount); //make a 90 degree turn left
-        Sleep(1.0);
-        //move_forward(testSpeed, 160); //move closer to the ramp
-    }
+    turn_left(testSpeed, ninetyDegreeCount);
 
-    //Check if light is blue
-    else if (cds.Value() > 0.8 && cds.Value() < 1.2){
-        move_backward(testSpeed, 50); //Move closer to the red button
-        Sleep(1.0);
-        turn_left(testSpeed, ninetyDegreeCount); //make a 90 degree turn left
-        Sleep(1.0);
-        move_forward(testSpeed, 10); //press the button
-        Sleep(1.0);
-        move_backward(testSpeed, 25); //move back from the button
-        Sleep(1.0);
-        turn_left(testSpeed, ninetyDegreeCount); //make a 90 degree turn left
-        Sleep(1.0);
-        //move_forward(testSpeed, 150); //move closer to the ramp
-    }
+    move_forward(50, 25);
 
-    else {
-        //Write to the screen that no light was detected
-        left_motor.Stop();
-        right_motor.Stop();
-        LCD.WriteLine("You\'re a failure");
-        Sleep(10.0);
-    }
-
+    move_backward(testSpeed, 50); //move back from the button
     Sleep(1.0);
+    turn_left(testSpeed, ninetyDegreeCount); //make a 90 degree turn left
+    Sleep(1.0);
+
+    // //Check if light is not red or blue
+
+    // float light_detected = TimeNow();
+    // left_motor.SetPercent(-1 * testSpeed);
+    // right_motor.SetPercent(testSpeed);
+
+    // while (TimeNow()-light_detected <= 4.00) {
+
+    //     if (cds.Value() > 0.3 && cds.Value() < 1.2){
+
+    //         left_motor.Stop();
+    //         right_motor.Stop();
+
+    //         Sleep(1.0);
+
+    //         //Check if light is red
+    //         if (cds.Value() > 0.3 && cds.Value() < 0.7){
+    //             LCD.WriteLine("RED detected");
+    //             move_forward(testSpeed, 1);
+    //             turn_left(testSpeed, ninetyDegreeCount); //Make a 90 degree turn 
+    //             Sleep(1.0);
+    //             move_forward(testSpeed, 10); //press the button
+    //             Sleep(1.0);
+    //             move_backward(testSpeed, 50); //move back from the button 
+    //             Sleep(1.0);
+    //             turn_left(testSpeed, ninetyDegreeCount); //make a 90 degree turn left
+    //             Sleep(1.0);
+    //         }
+
+    //         //Check if light is blue
+    //         else if (cds.Value() > 0.8 && cds.Value() < 1.2){
+    //             LCD.WriteLine("BLUE detected");
+    //             Sleep(1.0);
+    //             turn_left(testSpeed, ninetyDegreeCount); //make a 90 degree turn left
+    //             Sleep(1.0);
+    //             move_forward(testSpeed, 10); //press the button
+    //             Sleep(1.0);
+    //             move_backward(testSpeed, 50); //move back from the button
+    //             Sleep(1.0);
+    //             turn_left(testSpeed, ninetyDegreeCount); //make a 90 degree turn left
+    //             Sleep(1.0);
+    //         }
+
+    //         else {
+    //             LCD.WriteLine("RED");
+    //             left_motor.Stop();
+    //             right_motor.Stop();
+    //         } 
+    //     }
+    // }
+
+    left_motor.Stop();
+    right_motor.Stop();
+
     turn_left(testSpeed, ninetyDegreeCount); //turn left to face the ramp
     Sleep(1.0);
-    move_forward(testSpeed, 200); //move up the ramp
+    move_forward(testSpeed, 1000); //move up the ramp
     Sleep(1.0);
-    move_backward(testSpeed, 200); //move down the ramp
+    move_backward(testSpeed, 1000); //move down the ramp
 
     Sleep(1.0);
 
