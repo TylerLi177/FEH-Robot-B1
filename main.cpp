@@ -222,12 +222,12 @@ int main(void)
     Sleep(1.0);
     turn_left(testSpeed, ninetyDegreeCount); //turn 90 dgerees to move to the ramp
     Sleep(1.0);
-    move_backward(testSpeed, 215); //move closer to the ramp
+    move_backward(testSpeed, 210); //move closer to the ramp
     Sleep(1.0);
-    turn_right(testSpeed, ninetyDegreeCount); //turn to face the ramp
+    turn_left(testSpeed, ninetyDegreeCount); //turn to face the ramp
     Sleep(1.0);
-    move_forward(50, 1000); //move up the ramp
-    
+    move_backward(50, 1000); //move up the ramp
+        
     //Celebrate that the code ran all the way through
     LCD.WriteLine("Hell yeah");
 
