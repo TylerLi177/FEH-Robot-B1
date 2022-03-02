@@ -12,7 +12,7 @@
 #include <stdio.h>
 #define testSpeed 25
 #define armSpeed 10
-#define ninetyDegreeCount 135
+#define ninetyDegreeCount 221
 #define PI 3.14159265358979323846
 
 DigitalEncoder right_encoder(FEHIO::P1_0);
@@ -76,6 +76,8 @@ void move_backward(int percent, int counts) //using encoders
 void turn_left(int percent, int counts) //using encoders
 {
 
+LCD.WriteLine("Left");
+
 //Reset encoder counts
 
 right_encoder.ResetCounts();
@@ -88,13 +90,9 @@ left_motor.SetPercent(percent);
 right_motor.SetPercent(percent);
 
 //While the average of the left and right encoder is less than counts,
-
 //keep running motors
 
-while (((left_encoder.Counts() + right_encoder.Counts()) / 2) < counts) {
-    LCD.WriteLine("Left");
-    Sleep(1.0);
-}
+while (((left_encoder.Counts() + right_encoder.Counts()) / 2) < counts);
 
 //Turn off motors
 
@@ -106,6 +104,8 @@ left_motor.Stop();
 
 void turn_right(int percent, int counts) //using encoders
 {
+
+LCD.WriteLine("Right");
 
 //Reset encoder counts
 
@@ -123,10 +123,7 @@ right_motor.SetPercent(-1 * percent);
 //While the average of the left and right encoder is less than counts,
 //keep running motors
 
-while (((left_encoder.Counts() + right_encoder.Counts()) / 2) < counts) {
-    LCD.WriteLine("Right");
-    Sleep(1.0);
-}
+while (((left_encoder.Counts() + right_encoder.Counts()) / 2) < counts);
 
 //Turn off motors
 
@@ -205,32 +202,33 @@ int main(void)
     }
 
     //Move to trash can
-    move_forward(testSpeed, 250); //move forward from starting light
+    move_forward(testSpeed, 200); //move forward from starting light
     Sleep(1.0);
-    turn_left(testSpeed, 60); //make a slight turn
+    turn_left(testSpeed, 100); //make a slight turn
     Sleep(1.0);
-    move_forward(testSpeed, 350); //move forward to be level with trash can
+    move_forward(testSpeed, 325); //move forward to be level with trash can
     Sleep(1.0);
     turn_right(testSpeed, ninetyDegreeCount); //make a 90 degree turn right
     Sleep(1.0);
-    move_forward(testSpeed, 400); //move forward to trash can
+    move_forward(testSpeed, 325); //move forward to trash can
 
     //Dump tray into trash can
-    move_bucket_arm(armSpeed, 1); //move arm down
+    move_bucket_arm(armSpeed, 1.75); //move arm down
     Sleep(1.0);
-    move_bucket_arm(-1 * armSpeed, 1); //retract arm back up
+    move_bucket_arm(-1 * armSpeed, 1.75); //retract arm back up
 
     //Move up the ramp
-    move_backward(testSpeed, 100); //move back from trash can
+    move_backward(testSpeed, 125); //move back from trash can
     Sleep(1.0);
-    turn_right(testSpeed, ninetyDegreeCount); //turn 90 dgerees to move to the ramp
+    turn_left(testSpeed, ninetyDegreeCount); //turn 90 dgerees to move to the ramp
     Sleep(1.0);
-    move_forward(testSpeed, 200); //move closer to the ramp
+    move_backward(testSpeed, 215); //move closer to the ramp
     Sleep(1.0);
-    turn_left(testSpeed, ninetyDegreeCount); //turn to face the ramp
+    turn_right(testSpeed, ninetyDegreeCount); //turn to face the ramp
     Sleep(1.0);
-    move_forward(testSpeed, 500); //move up the ramp
+    move_forward(50, 1000); //move up the ramp
     
+    //Celebrate that the code ran all the way through
     LCD.WriteLine("Hell yeah");
 
 }
