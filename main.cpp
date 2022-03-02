@@ -12,8 +12,9 @@
 #include <stdio.h>
 #define testSpeed 25
 #define armSpeed 10
-#define ninetyDegreeCount 221
-#define PI 3.14159265358979323846
+#define ninetyDegreeCount 220
+#define SERVO_MIN 510
+#define SERVO_MAX 2410
 
 DigitalEncoder right_encoder(FEHIO::P1_0);
 DigitalEncoder left_encoder(FEHIO::P3_0);
@@ -24,6 +25,7 @@ AnalogInputPin left_opt(FEHIO::P2_7);
 AnalogInputPin middle_opt(FEHIO::P2_0);
 AnalogInputPin right_opt(FEHIO::P1_4);
 FEHMotor bucket_arm(FEHMotor::Motor2,9.0);
+FEHServo sliding_arm(FEHServo::Servo0); 
 
 void move_forward(int percent, int counts) //using encoders
 {
@@ -176,7 +178,7 @@ void move_bucket_arm(int percent, float seconds){
 
     float time = TimeNow();
 
-    //move thr arm for a certain amoutn of time
+    //move the arm for a certain amount of time
     while(TimeNow() - time < seconds){
         if(percent > 0){
             LCD.WriteLine("Dropping bucket");
@@ -188,6 +190,19 @@ void move_bucket_arm(int percent, float seconds){
         }
     }
     bucket_arm.Stop();
+}
+
+void move_sliding_arm(float start_angle, float end_angle){
+
+    //Set the servo min and max
+    sliding_arm.SetMin(SERVO_MIN);
+    sliding_arm.SetMax(SERVO_MAX);
+
+    //Start at 0 degrees
+    sliding_arm.SetDegree(start_angle);
+    Sleep(2.0);
+    //Set end angle
+    sliding_arm.SetDegree(end_angle);
 }
 
 int main(void)
@@ -218,17 +233,30 @@ int main(void)
     move_bucket_arm(-1 * armSpeed, 1.75); //retract arm back up
 
     //Move up the ramp
-    move_backward(testSpeed, 125); //move back from trash can
+    move_backward(testSpeed, 200); //move back from trash can
     Sleep(1.0);
-    turn_left(testSpeed, ninetyDegreeCount); //turn 90 dgerees to move to the ramp
+    turn_left(testSpeed, ninetyDegreeCount - 10); //turn 90 dgerees to move to the ramp
     Sleep(1.0);
-    move_backward(testSpeed, 210); //move closer to the ramp
+    move_backward(testSpeed, 225); //move closer to the ramp
     Sleep(1.0);
-    turn_left(testSpeed, ninetyDegreeCount); //turn to face the ramp
+    turn_left(testSpeed, ninetyDegreeCount - 10); //turn to face the ramp
     Sleep(1.0);
-    move_backward(50, 1000); //move up the ramp
+    move_backward(2 * testSpeed, 400); //move up the ramp
+
+    //move to the ticket
+    turn_right(testSpeed, ninetyDegreeCount + 10);
+    move_backward(testSpeed, 150);
+
+    //pull out arm to move ticket
+    move_sliding_arm(0.0 , 180.0);
+    move_sliding_arm(180.0, 0.0);
+    move_forward(testSpeed, 50);
+
+    //touch stove
+    turn_left(testSpeed, ninetyDegreeCount);
+    move_backward(testSpeed, 300);
         
     //Celebrate that the code ran all the way through
     LCD.WriteLine("Hell yeah");
-
+    
 }
