@@ -11,6 +11,7 @@
 #include <string.h>
 #include <stdio.h>
 #define testSpeed 25
+#define armSpeed 10
 #define ninetyDegreeCount 135
 #define PI 3.14159265358979323846
 
@@ -179,19 +180,17 @@ void move_bucket_arm(int percent, float seconds){
     float time = TimeNow();
 
     //move thr arm for a certain amoutn of time
-    while(time - TimeNow() < seconds){
-    if(percent > 0){
-        LCD.WriteLine("Dropping bucket");
-        Sleep(0.5);
+    while(TimeNow() - time < seconds){
+        if(percent > 0){
+            LCD.WriteLine("Dropping bucket");
+            Sleep(0.5);
+        }
+        else {
+            LCD.WriteLine("Raising bucket");
+            Sleep(0.5);
+        }
     }
-    else {
-        LCD.WriteLine("Raising bucket");
-        Sleep(0.5);
-    }
-    
-    //Stop the arm
     bucket_arm.Stop();
-    }
 }
 
 int main(void)
@@ -217,20 +216,20 @@ int main(void)
     move_forward(testSpeed, 400); //move forward to trash can
 
     //Dump tray into trash can
-    move_bucket_arm(testSpeed, 2); //move arm down
+    move_bucket_arm(armSpeed, 1); //move arm down
     Sleep(1.0);
-    move_bucket_arm(-1 * testSpeed, 2); //retract arm back up
+    move_bucket_arm(-1 * armSpeed, 1); //retract arm back up
 
-    // //Move up the ramp
-    // move_backward(testSpeed, 100); //move back from trash can
-    // Sleep(1.0);
-    // turn_right(testSpeed, ninetyDegreeCount); //turn 90 dgerees to move to the ramp
-    // Sleep(1.0);
-    // move_forward(testSpeed, 200); //move closer to the ramp
-    // Sleep(1.0);
-    // turn_left(testSpeed, ninetyDegreeCount); //turn to face the ramp
-    // Sleep(1.0);
-    // move_forward(testSpeed, 500); //move up the ramp
+    //Move up the ramp
+    move_backward(testSpeed, 100); //move back from trash can
+    Sleep(1.0);
+    turn_right(testSpeed, ninetyDegreeCount); //turn 90 dgerees to move to the ramp
+    Sleep(1.0);
+    move_forward(testSpeed, 200); //move closer to the ramp
+    Sleep(1.0);
+    turn_left(testSpeed, ninetyDegreeCount); //turn to face the ramp
+    Sleep(1.0);
+    move_forward(testSpeed, 500); //move up the ramp
     
     LCD.WriteLine("Hell yeah");
 
