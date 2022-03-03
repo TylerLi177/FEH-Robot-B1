@@ -199,9 +199,13 @@ void move_sliding_arm(float start_angle, float end_angle){
     sliding_arm.SetMax(SERVO_MAX);
 
     //Start at 0 degrees
+    LCD.WriteLine("Sliding arm");
+    LCD.WriteLine("Please stand clear");
     sliding_arm.SetDegree(start_angle);
-    Sleep(2.0);
+    Sleep(1.0);
     //Set end angle
+    LCD.WriteLine("Sliding arm");
+    LCD.WriteLine("Please stand clear");
     sliding_arm.SetDegree(end_angle);
 }
 
@@ -219,13 +223,13 @@ int main(void)
     //Move to trash can
     move_forward(testSpeed, 200); //move forward from starting light
     Sleep(1.0);
-    turn_left(testSpeed, 100); //make a slight turn
+    turn_left(testSpeed, 98); //make a slight turn
     Sleep(1.0);
-    move_forward(testSpeed, 325); //move forward to be level with trash can
+    move_forward(testSpeed, 365); //move forward to be level with trash can
     Sleep(1.0);
     turn_right(testSpeed, ninetyDegreeCount); //make a 90 degree turn right
     Sleep(1.0);
-    move_forward(testSpeed, 325); //move forward to trash can
+    move_forward(testSpeed, 330); //move forward to trash can
 
     //Dump tray into trash can
     move_bucket_arm(armSpeed, 1.75); //move arm down
@@ -235,26 +239,31 @@ int main(void)
     //Move up the ramp
     move_backward(testSpeed, 200); //move back from trash can
     Sleep(1.0);
-    turn_left(testSpeed, ninetyDegreeCount - 10); //turn 90 dgerees to move to the ramp
+    turn_left(testSpeed, ninetyDegreeCount - 5); //turn left to move to the ramp
     Sleep(1.0);
-    move_backward(testSpeed, 225); //move closer to the ramp
+    move_backward(testSpeed, 210); //move closer to the ramp
     Sleep(1.0);
     turn_left(testSpeed, ninetyDegreeCount - 10); //turn to face the ramp
     Sleep(1.0);
-    move_backward(2 * testSpeed, 400); //move up the ramp
+    move_backward(2 * testSpeed, 385); //move up the ramp
+    Sleep(1.0);
 
     //move to the ticket
-    turn_right(testSpeed, ninetyDegreeCount + 10);
-    move_backward(testSpeed, 150);
+    turn_right(testSpeed, ninetyDegreeCount + 10); //move to closer to ticket
+    Sleep(1.0);
+    move_backward(testSpeed, 208); //move to middle of ticket station
+    Sleep(1.0);
 
     //pull out arm to move ticket
-    move_sliding_arm(0.0 , 180.0);
-    move_sliding_arm(180.0, 0.0);
-    move_forward(testSpeed, 50);
+    move_sliding_arm(180.0, 0.0); //Move ticket to final position
+    Sleep(1.0);
+    move_sliding_arm(0.0 , 180.0); //Move ticket from initial position
+    Sleep(1.0);
 
     //touch stove
-    turn_left(testSpeed, ninetyDegreeCount);
-    move_backward(testSpeed, 300);
+    turn_left(testSpeed, ninetyDegreeCount); //face the stove
+    Sleep(1.0);
+    move_backward(2 * testSpeed, 750); //Move closer to the stove
         
     //Celebrate that the code ran all the way through
     LCD.WriteLine("Hell yeah");
