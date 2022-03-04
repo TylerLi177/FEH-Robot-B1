@@ -211,7 +211,6 @@ void move_sliding_arm(float start_angle, float end_angle){
 
 int main(void)
 {
-    LCD.WriteLine("TESTING TESTING 1 2 3");
     //Check if the starting light is not red
     while (cds.Value() <= 0.3 || cds.Value() >= 0.7) {
         left_motor.Stop();
@@ -225,7 +224,7 @@ int main(void)
     Sleep(1.0);
     turn_left(testSpeed, 98); //make a slight turn
     Sleep(1.0);
-    move_forward(testSpeed, 365); //move forward to be level with trash can
+    move_forward(testSpeed, 366); //move forward to be level with trash can
     Sleep(1.0);
     turn_right(testSpeed, ninetyDegreeCount); //make a 90 degree turn right
     Sleep(1.0);
@@ -237,25 +236,35 @@ int main(void)
     move_bucket_arm(-1 * armSpeed, 1.75); //retract arm back up
 
     //Move up the ramp
-    move_backward(testSpeed, 200); //move back from trash can
+    move_backward(testSpeed, 205); //move back from trash can
     Sleep(1.0);
     turn_left(testSpeed, ninetyDegreeCount - 5); //turn left to move to the ramp
     Sleep(1.0);
-    move_backward(testSpeed, 210); //move closer to the ramp
+    move_backward(15, 290); //move closer to the ramp
     Sleep(1.0);
     turn_left(testSpeed, ninetyDegreeCount - 10); //turn to face the ramp
     Sleep(1.0);
-    move_backward(2 * testSpeed, 385); //move up the ramp
+    move_backward(2 * testSpeed, 370); //move up the ramp
+    Sleep(1.0);
+    move_forward(15, 6); //adjust
     Sleep(1.0);
 
     //move to the ticket
     turn_right(testSpeed, ninetyDegreeCount + 10); //move to closer to ticket
     Sleep(1.0);
-    move_backward(testSpeed, 208); //move to middle of ticket station
+    move_backward(testSpeed, 220); //move to middle of ticket station
+    move_forward(10, 1); //move to middle of ticket station
+    turn_right(testSpeed, 10); //closer baby
+    move_backward(10, 2); //move to middle of ticket station
     Sleep(1.0);
 
     //pull out arm to move ticket
-    move_sliding_arm(180.0, 0.0); //Move ticket to final position
+    move_sliding_arm(180.0, 170.0); //Move ticket to final position
+    Sleep(1.0);
+    turn_right(testSpeed, 10); //closer baby
+    Sleep(1.0);
+    //move_sliding_arm(170.0, 0.0); //Move ticket to final position
+    turn_right(testSpeed, ninetyDegreeCount);
     Sleep(1.0);
     move_sliding_arm(0.0 , 180.0); //Move ticket from initial position
     Sleep(1.0);
@@ -266,6 +275,34 @@ int main(void)
     move_backward(2 * testSpeed, 750); //Move closer to the stove
         
     //Celebrate that the code ran all the way through
+    Buzzer.Tone(FEHBuzzer::G3, 83);
+    Buzzer.Tone(FEHBuzzer::C4, 83);
+    Buzzer.Tone(FEHBuzzer::E4, 83);
+    Buzzer.Tone(FEHBuzzer::G4, 83);
+    Buzzer.Tone(FEHBuzzer::C5, 83);
+    Buzzer.Tone(FEHBuzzer::E5, 83);
+    Buzzer.Tone(FEHBuzzer::G5, 250);
+    Buzzer.Tone(FEHBuzzer::E5, 250);
+    Buzzer.Tone(FEHBuzzer::Af3, 83);
+    Buzzer.Tone(FEHBuzzer::C4, 83);
+    Buzzer.Tone(FEHBuzzer::Ef4, 83);
+    Buzzer.Tone(FEHBuzzer::Af4, 83);
+    Buzzer.Tone(FEHBuzzer::C5, 83);
+    Buzzer.Tone(FEHBuzzer::Ef5, 83);
+    Buzzer.Tone(FEHBuzzer::Af5, 250);
+    Buzzer.Tone(FEHBuzzer::E5, 250);
+    Buzzer.Tone(FEHBuzzer::Bf3, 83);
+    Buzzer.Tone(FEHBuzzer::D4, 83);
+    Buzzer.Tone(FEHBuzzer::F4, 83);
+    Buzzer.Tone(FEHBuzzer::Bf4, 83);
+    Buzzer.Tone(FEHBuzzer::D5, 83);
+    Buzzer.Tone(FEHBuzzer::F5, 83);
+    Buzzer.Tone(FEHBuzzer::Bf5, 250);
+    Buzzer.Tone(FEHBuzzer::Bf5, 83);
+    Buzzer.Tone(FEHBuzzer::Bf5, 83);
+    Buzzer.Tone(FEHBuzzer::Bf5, 83);
+    Buzzer.Tone(FEHBuzzer::C6, 1000);
+
     LCD.WriteLine("Hell yeah");
     
 }
