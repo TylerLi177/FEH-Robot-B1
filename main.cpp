@@ -186,7 +186,7 @@ void check_heading(float heading)
     */
 // Determine the direction of the motors based on the orientation of the QR code 
     int power = PULSE_POWER;
-    if(orientation == MINUS){
+    if(heading == MINUS){
         power = -PULSE_POWER;
     }
 
@@ -225,8 +225,8 @@ int main(void)
     // COMPLETE CODE HERE TO READ SD CARD FOR LOGGED X AND Y DATA POINTS
     FEHFile* fptr = SD.FOpen("RPS_TEST.txt", "r");
     SD.FScanf(fptr, "%f%f", &A_x, &A_y);
-    FEHFile *ofptr = SD.FOpen("Output.txt", "w"    <ADD CODE HERE>
-    SD.FPrintf(ofptr, "INT: %d, FLOAT: %f, CHAR: %c", ex_int, ex_float, ex_char);
+    FEHFile *ofptr = SD.FOpen("Output.txt", "w");
+    SD.FPrintf(ofptr, "X: %f, Y: %f", &A_x, &A_y);
     SD.FClose(ofptr);
     SD.FClose(fptr);
 
