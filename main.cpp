@@ -11,6 +11,7 @@
 #include <string.h>
 #include <stdio.h>
 #define testSpeed 25
+#define slowSpeed 15
 #define armSpeed 10
 #define ninetyDegreeCount 220
 #define SERVO_MIN 510
@@ -31,7 +32,7 @@ DigitalInputPin bump_switch1(FEHIO::P0_3);
 DigitalInputPin bump_switch2(FEHIO::P3_2);
 
 
-void move_forward(int percent, int counts) //using encoders
+void move_forward(int percent, int counts, float timeFailSafe) //using encoders
 {
     //Reset encoder counts
     right_encoder.ResetCounts();
@@ -41,21 +42,21 @@ void move_forward(int percent, int counts) //using encoders
     right_motor.SetPercent(-1 * percent);
     left_motor.SetPercent(percent);
 
-    while (left_encoder.Counts() < counts){
+    //While the average of the left and right encoder is less than counts,
+    //keep running motors
+
+    float time = TimeNow();
+    while(((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts) && (TimeNow() - time < timeFailSafe)){
         LCD.WriteLine("forward");
         Sleep(1.0);
     }
-
-    //While the average of the left and right encoder is less than counts,
-    //keep running motors
-    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts);
 
     //Turn off motors
     right_motor.Stop();
     left_motor.Stop();
 }
 
-void move_backward(int percent, int counts) //using encoders
+void move_backward(int percent, int counts, float timeFailSafe) //using encoders
 {
     //Reset encoder counts
     right_encoder.ResetCounts();
@@ -65,14 +66,14 @@ void move_backward(int percent, int counts) //using encoders
     right_motor.SetPercent(percent);
     left_motor.SetPercent(-1 * percent);
 
-    while (left_encoder.Counts() < counts){
+    //While the average of the left and right encoder is less than counts,
+    //keep running motors
+
+    float time = TimeNow();
+    while(((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts) && (TimeNow() - time < timeFailSafe)){
         LCD.WriteLine("backward");
         Sleep(1.0);
     }
-
-    //While the average of the left and right encoder is less than counts,
-    //keep running motors
-    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts);
     
     //Turn off motors
     right_motor.Stop();
@@ -175,6 +176,38 @@ void lineTracking(float fast_motor_percent, float slow_motor_percent){
     }
 }
 
+void celebrate(){
+    //Celebrate
+    Buzzer.Tone(FEHBuzzer::G3, 83);
+    Buzzer.Tone(FEHBuzzer::C4, 83);
+    Buzzer.Tone(FEHBuzzer::E4, 83);
+    Buzzer.Tone(FEHBuzzer::G4, 83);
+    Buzzer.Tone(FEHBuzzer::C5, 83);
+    Buzzer.Tone(FEHBuzzer::E5, 83);
+    Buzzer.Tone(FEHBuzzer::G5, 250);
+    Buzzer.Tone(FEHBuzzer::E5, 250);
+    Buzzer.Tone(FEHBuzzer::Af3, 83);
+    Buzzer.Tone(FEHBuzzer::C4, 83);
+    Buzzer.Tone(FEHBuzzer::Ef4, 83);
+    Buzzer.Tone(FEHBuzzer::Af4, 83);
+    Buzzer.Tone(FEHBuzzer::C5, 83);
+    Buzzer.Tone(FEHBuzzer::Ef5, 83);
+    Buzzer.Tone(FEHBuzzer::Af5, 250);
+    Buzzer.Tone(FEHBuzzer::E5, 250);
+    Buzzer.Tone(FEHBuzzer::Bf3, 83);
+    Buzzer.Tone(FEHBuzzer::D4, 83);
+    Buzzer.Tone(FEHBuzzer::F4, 83);
+    Buzzer.Tone(FEHBuzzer::Bf4, 83);
+    Buzzer.Tone(FEHBuzzer::D5, 83);
+    Buzzer.Tone(FEHBuzzer::F5, 83);
+    Buzzer.Tone(FEHBuzzer::Bf5, 250);
+    Buzzer.Tone(FEHBuzzer::Bf5, 83);
+    Buzzer.Tone(FEHBuzzer::Bf5, 83);
+    Buzzer.Tone(FEHBuzzer::Bf5, 83);
+    Buzzer.Tone(FEHBuzzer::C6, 1000);
+    LCD.WriteLine("Hell yeah");
+}
+
 void move_bucket_arm(int percent, float seconds){
 
     //Set desired motor percentage
@@ -245,72 +278,53 @@ int main(void)
     }
 
     //Move up ramp
-    move_forward(testSpeed, 205); //move forward from starting light
+    move_forward(slowSpeed, 242, 5.0); //move forward from starting light
     Sleep(1.0);
-    turn_left(testSpeed, ninetyDegreeCount + 100); //make a 270 degree turn
+    turn_left(slowSpeed, 310); //turn to ramp
     Sleep(1.0);
-    move_backward(2 * testSpeed, 750); //move up ramp
+    move_backward(3 * testSpeed, 750, 5.0); //move up ramp
     Sleep(1.0);
 
     //Move to burger flip
-
-    // //Inch forward until the left optosensor is on the black line in front of the stove
-    // for (int i = 0;left_opt.Value() <= 0.8; i++){
-    //     move_backward(testSpeed, i);
-    // }
-
     turn_left(testSpeed, ninetyDegreeCount);
     Sleep(1.0);
 
+    //Correct position against wall
     for (int i = 0; bump_switch1.Value() == 1 || bump_switch2.Value() == 1; i++){
-        move_forward(testSpeed, i);
+        move_forward(testSpeed, i, 5.0);
     }
 
-    move_backward(15, 110);
-    Sleep(1.0);
-    turn_right(testSpeed, ninetyDegreeCount);
-    Sleep(1.0);
-    move_backward(15, 300);
+    //align with stove
+    move_backward(slowSpeed, 105, 5.0);
     Sleep(1.0);
 
-    // //follow the line to the stove for a certain amount of time
-    // float time = TimeNow();
-    // while(TimeNow() - time < 4){
-    //     lineTracking(15, 6.9);
-    // }
+    //turn towards stove
+    turn_right(testSpeed, ninetyDegreeCount + 3);
+    Sleep(1.0);
 
+    //move to stove
+    move_backward(slowSpeed, 400, 10.0);
+
+    Sleep(1.0);
+
+    //Flip burger
     move_prong_arm(5 * armSpeed, 0.5);
     move_prong_arm(-5 * armSpeed, 0.5);
 
-    //Celebrate that the code ran all the way through
-    Buzzer.Tone(FEHBuzzer::G3, 83);
-    Buzzer.Tone(FEHBuzzer::C4, 83);
-    Buzzer.Tone(FEHBuzzer::E4, 83);
-    Buzzer.Tone(FEHBuzzer::G4, 83);
-    Buzzer.Tone(FEHBuzzer::C5, 83);
-    Buzzer.Tone(FEHBuzzer::E5, 83);
-    Buzzer.Tone(FEHBuzzer::G5, 250);
-    Buzzer.Tone(FEHBuzzer::E5, 250);
-    Buzzer.Tone(FEHBuzzer::Af3, 83);
-    Buzzer.Tone(FEHBuzzer::C4, 83);
-    Buzzer.Tone(FEHBuzzer::Ef4, 83);
-    Buzzer.Tone(FEHBuzzer::Af4, 83);
-    Buzzer.Tone(FEHBuzzer::C5, 83);
-    Buzzer.Tone(FEHBuzzer::Ef5, 83);
-    Buzzer.Tone(FEHBuzzer::Af5, 250);
-    Buzzer.Tone(FEHBuzzer::E5, 250);
-    Buzzer.Tone(FEHBuzzer::Bf3, 83);
-    Buzzer.Tone(FEHBuzzer::D4, 83);
-    Buzzer.Tone(FEHBuzzer::F4, 83);
-    Buzzer.Tone(FEHBuzzer::Bf4, 83);
-    Buzzer.Tone(FEHBuzzer::D5, 83);
-    Buzzer.Tone(FEHBuzzer::F5, 83);
-    Buzzer.Tone(FEHBuzzer::Bf5, 250);
-    Buzzer.Tone(FEHBuzzer::Bf5, 83);
-    Buzzer.Tone(FEHBuzzer::Bf5, 83);
-    Buzzer.Tone(FEHBuzzer::Bf5, 83);
-    Buzzer.Tone(FEHBuzzer::C6, 1000);
+    //back out of wheel
+    move_forward(testSpeed, 50, 2.0);
 
-    LCD.WriteLine("Hell yeah");
-    
+    //move toward ice cream
+    turn_right(testSpeed, ninetyDegreeCount + 69);
+
+    //move toward a lever
+    move_forward(testSpeed, 550, 10.0);
+
+    //Flip a lever
+    move_bucket_arm(armSpeed, 2.0);
+    Sleep(1.0);
+    move_bucket_arm(-1 * armSpeed, 2.0);
+
+    //Celebrate that the code ran all the way through
+    celebrate();    
 }
