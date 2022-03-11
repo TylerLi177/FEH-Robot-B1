@@ -251,15 +251,16 @@ int main(void)
     }
 
     //Move up ramp
-    move_forward(slowSpeed, 240, 5.0); //move forward from starting light
+    move_forward(slowSpeed, 241, 5.0); //move forward from starting light
     Sleep(1.0);
     turn_left(slowSpeed, 305); //turn to ramp
     Sleep(1.0);
-    move_backward(3 * testSpeed, 750, 5.0); //move up ramp
+    move_backward(3 * testSpeed, 515, 5.0); //move up ramp
+    move_backward(testSpeed, 315, 5.0); //move up ramp
     Sleep(1.0);
 
     //Move to burger flip
-    turn_right(testSpeed, ninetyDegreeCount);
+    turn_left(testSpeed, ninetyDegreeCount);
     Sleep(1.0);
 
     //Correct position against wall
@@ -268,15 +269,31 @@ int main(void)
     }
 
     //align with stove
-    move_backward(slowSpeed, 104, 5.0);
+    move_backward(slowSpeed, 106, 5.0);
     Sleep(1.0);
 
     //turn towards stove
-    turn_right(testSpeed, ninetyDegreeCount + 3);
+    turn_right(testSpeed, ninetyDegreeCount + 1);
     Sleep(1.0);
 
     //move to stove
-    move_backward(slowSpeed, 500, 10.0);
+    move_backward(slowSpeed, 500, 5.0);
+
+    move_forward(slowSpeed, 5, 0.5);
+
+    //Wiggle
+    turn_left(testSpeed, 1);
+    move_backward(testSpeed, 1, 1.0);
+    turn_right(testSpeed, 4);
+    move_backward(testSpeed, 1, 1.0);
+
+    Sleep(1.0);
+
+    //Wiggle
+    turn_left(testSpeed, 1);
+    move_backward(testSpeed, 1, 1.0);
+    turn_right(testSpeed, 4);
+    move_backward(testSpeed, 1, 1.0);
 
     Sleep(1.0);
 
@@ -291,14 +308,14 @@ int main(void)
     turn_right(testSpeed, ninetyDegreeCount + 69);
 
     //move toward a lever
-    move_forward(testSpeed, 750, 10.0);
+    move_forward(testSpeed, 600, 10.0);
 
     //Flip a lever
     move_bucket_arm(armSpeed, 2.0);
     Sleep(1.0);
     move_bucket_arm(-1 * armSpeed, 2.0);
 
-    Sleep(1.0);
+    Sleep(2.0);
 
     //Celebrate that the code ran all the way through
     Buzzer.Tone(FEHBuzzer::G3, 83);
