@@ -253,13 +253,13 @@ int main(void)
     //Move up ramp
     move_forward(slowSpeed, 240, 5.0); //move forward from starting light
     Sleep(1.0);
-    turn_left(slowSpeed, 300); //turn to ramp
+    turn_left(slowSpeed, 305); //turn to ramp
     Sleep(1.0);
     move_backward(3 * testSpeed, 750, 5.0); //move up ramp
     Sleep(1.0);
 
     //Move to burger flip
-    turn_left(testSpeed, ninetyDegreeCount);
+    turn_right(testSpeed, ninetyDegreeCount);
     Sleep(1.0);
 
     //Correct position against wall
@@ -297,6 +297,8 @@ int main(void)
     move_bucket_arm(armSpeed, 2.0);
     Sleep(1.0);
     move_bucket_arm(-1 * armSpeed, 2.0);
+
+    Sleep(1.0);
 
     //Celebrate that the code ran all the way through
     Buzzer.Tone(FEHBuzzer::G3, 83);
