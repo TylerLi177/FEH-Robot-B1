@@ -176,38 +176,6 @@ void lineTracking(float fast_motor_percent, float slow_motor_percent){
     }
 }
 
-void celebrate(){
-    //Celebrate
-    Buzzer.Tone(FEHBuzzer::G3, 83);
-    Buzzer.Tone(FEHBuzzer::C4, 83);
-    Buzzer.Tone(FEHBuzzer::E4, 83);
-    Buzzer.Tone(FEHBuzzer::G4, 83);
-    Buzzer.Tone(FEHBuzzer::C5, 83);
-    Buzzer.Tone(FEHBuzzer::E5, 83);
-    Buzzer.Tone(FEHBuzzer::G5, 250);
-    Buzzer.Tone(FEHBuzzer::E5, 250);
-    Buzzer.Tone(FEHBuzzer::Af3, 83);
-    Buzzer.Tone(FEHBuzzer::C4, 83);
-    Buzzer.Tone(FEHBuzzer::Ef4, 83);
-    Buzzer.Tone(FEHBuzzer::Af4, 83);
-    Buzzer.Tone(FEHBuzzer::C5, 83);
-    Buzzer.Tone(FEHBuzzer::Ef5, 83);
-    Buzzer.Tone(FEHBuzzer::Af5, 250);
-    Buzzer.Tone(FEHBuzzer::E5, 250);
-    Buzzer.Tone(FEHBuzzer::Bf3, 83);
-    Buzzer.Tone(FEHBuzzer::D4, 83);
-    Buzzer.Tone(FEHBuzzer::F4, 83);
-    Buzzer.Tone(FEHBuzzer::Bf4, 83);
-    Buzzer.Tone(FEHBuzzer::D5, 83);
-    Buzzer.Tone(FEHBuzzer::F5, 83);
-    Buzzer.Tone(FEHBuzzer::Bf5, 250);
-    Buzzer.Tone(FEHBuzzer::Bf5, 83);
-    Buzzer.Tone(FEHBuzzer::Bf5, 83);
-    Buzzer.Tone(FEHBuzzer::Bf5, 83);
-    Buzzer.Tone(FEHBuzzer::C6, 1000);
-    LCD.WriteLine("Hell yeah");
-}
-
 void move_bucket_arm(int percent, float seconds){
 
     //Set desired motor percentage
@@ -269,6 +237,11 @@ void move_prong_arm(int percent, float seconds){
 
 int main(void)
 {
+    // get the voltage level and display it to the screen
+        LCD.WriteLine("Battery Voltage: ");
+        LCD.WriteLine(Battery.Voltage());
+        LCD.WriteLine("\n");
+        Sleep(0.5);
     //Check if the starting light is not red
     while (cds.Value() <= 0.3 || cds.Value() >= 0.7) {
         left_motor.Stop();
@@ -278,9 +251,9 @@ int main(void)
     }
 
     //Move up ramp
-    move_forward(slowSpeed, 242, 5.0); //move forward from starting light
+    move_forward(slowSpeed, 240, 5.0); //move forward from starting light
     Sleep(1.0);
-    turn_left(slowSpeed, 310); //turn to ramp
+    turn_left(slowSpeed, 300); //turn to ramp
     Sleep(1.0);
     move_backward(3 * testSpeed, 750, 5.0); //move up ramp
     Sleep(1.0);
@@ -295,7 +268,7 @@ int main(void)
     }
 
     //align with stove
-    move_backward(slowSpeed, 105, 5.0);
+    move_backward(slowSpeed, 104, 5.0);
     Sleep(1.0);
 
     //turn towards stove
@@ -303,7 +276,7 @@ int main(void)
     Sleep(1.0);
 
     //move to stove
-    move_backward(slowSpeed, 400, 10.0);
+    move_backward(slowSpeed, 500, 10.0);
 
     Sleep(1.0);
 
@@ -318,7 +291,7 @@ int main(void)
     turn_right(testSpeed, ninetyDegreeCount + 69);
 
     //move toward a lever
-    move_forward(testSpeed, 550, 10.0);
+    move_forward(testSpeed, 750, 10.0);
 
     //Flip a lever
     move_bucket_arm(armSpeed, 2.0);
@@ -326,5 +299,33 @@ int main(void)
     move_bucket_arm(-1 * armSpeed, 2.0);
 
     //Celebrate that the code ran all the way through
-    celebrate();    
+    Buzzer.Tone(FEHBuzzer::G3, 83);
+    Buzzer.Tone(FEHBuzzer::C4, 83);
+    Buzzer.Tone(FEHBuzzer::E4, 83);
+    Buzzer.Tone(FEHBuzzer::G4, 83);
+    Buzzer.Tone(FEHBuzzer::C5, 83);
+    Buzzer.Tone(FEHBuzzer::E5, 83);
+    Buzzer.Tone(FEHBuzzer::G5, 250);
+    Buzzer.Tone(FEHBuzzer::E5, 250);
+    Buzzer.Tone(FEHBuzzer::Af3, 83);
+    Buzzer.Tone(FEHBuzzer::C4, 83);
+    Buzzer.Tone(FEHBuzzer::Ef4, 83);
+    Buzzer.Tone(FEHBuzzer::Af4, 83);
+    Buzzer.Tone(FEHBuzzer::C5, 83);
+    Buzzer.Tone(FEHBuzzer::Ef5, 83);
+    Buzzer.Tone(FEHBuzzer::Af5, 250);
+    Buzzer.Tone(FEHBuzzer::E5, 250);
+    Buzzer.Tone(FEHBuzzer::Bf3, 83);
+    Buzzer.Tone(FEHBuzzer::D4, 83);
+    Buzzer.Tone(FEHBuzzer::F4, 83);
+    Buzzer.Tone(FEHBuzzer::Bf4, 83);
+    Buzzer.Tone(FEHBuzzer::D5, 83);
+    Buzzer.Tone(FEHBuzzer::F5, 83);
+    Buzzer.Tone(FEHBuzzer::Bf5, 250);
+    Buzzer.Tone(FEHBuzzer::Bf5, 83);
+    Buzzer.Tone(FEHBuzzer::Bf5, 83);
+    Buzzer.Tone(FEHBuzzer::Bf5, 83);
+    Buzzer.Tone(FEHBuzzer::C6, 1000);
+
+    LCD.WriteLine("Hell yeah");    
 }
