@@ -19,11 +19,11 @@
 #define COUNTS_PER_DEGREE 2.48
 
 // Defines for pulsing the robot
-#define PULSE_TIME 0.5
-#define PULSE_POWER 10
+#define PULSE_TIME 0.1
+#define PULSE_POWER 30
 
 // Define for the motor power
-#define POWER 15
+#define POWER 25
 
 // Orientation of QR Code
 #define PLUS 0
@@ -125,14 +125,16 @@ void check_x(float x_coordinate, int orientation)
     }
 
     // Check if receiving proper RPS coordinates and whether the robot is within an acceptable range
-    while((RPS.X() < 0) && (RPS.X() < x_coordinate - 1 || RPS.X() > x_coordinate + 1))
+    while((RPS.X() >= 0) && (RPS.X() < x_coordinate - 0.5 || RPS.X() > x_coordinate + 0.5))
     {
-        if(power == PULSE_POWER)
+        LCD.WriteLine("X: ");
+        LCD.WriteLine(RPS.X());
+        if(RPS.X() < x_coordinate)
         {
             // Pulse the motors for a short duration in the correct direction
-            pulse_forward(-power, PULSE_TIME);
+            pulse_forward(power, PULSE_TIME);
         }
-        else if(power == -PULSE_POWER)
+        else
         {
             // Pulse the motors for a short duration in the correct direction
             pulse_forward(power, PULSE_TIME);
@@ -153,14 +155,16 @@ void check_y(float y_coordinate, int orientation)
     }
 
     // Check if receiving proper RPS coordinates and whether the robot is within an acceptable range
-    while((RPS.Y() < 0) && (RPS.Y() < y_coordinate - 1 || RPS.Y() > y_coordinate + 1))
+    while((RPS.Y() >= 0) && (RPS.Y() < y_coordinate - 0.5 || RPS.Y() > y_coordinate + 0.5))
     {
-        if(power == PULSE_POWER)
+        LCD.WriteLine("Y: ");
+        LCD.WriteLine(RPS.Y());
+        if(RPS.Y() < y_coordinate)
         {
             // Pulse the motors for a short duration in the correct direction
-            pulse_forward(-power, PULSE_TIME);
+            pulse_forward(power, PULSE_TIME);
         }
-        else if(power == -PULSE_POWER)
+        else
         {
             // Pulse the motors for a short duration in the correct direction
            pulse_forward(power, PULSE_TIME);
@@ -191,14 +195,16 @@ void check_heading(float heading)
     }
 
     // Check if receiving proper RPS coordinates and whether the robot is within an acceptable range
-    while((RPS.Heading() < 0) && (RPS.Heading() < heading - 2 || RPS.Heading() > heading + 2))
+    while((RPS.Heading() >= 0) && (RPS.Heading() < heading - 2 || RPS.Heading() > heading + 2))
     {
-        if(power == PULSE_POWER)
+        LCD.WriteLine("Heading: ");
+        LCD.WriteLine(RPS.Heading());
+        if(RPS.Heading() < heading)
         {
             // Pulse the motors for a short duration in the correct direction
-            pulse_counterclockwise(-power, PULSE_TIME);
+            pulse_counterclockwise(power, PULSE_TIME);
         }
-        else if(power == -PULSE_POWER)
+        else
         {
             // Pulse the motors for a short duration in the correct direction
             pulse_counterclockwise(power, PULSE_TIME);
@@ -223,10 +229,17 @@ int main(void)
     while(LCD.Touch(&touch_x,&touch_y));
 
     // COMPLETE CODE HERE TO READ SD CARD FOR LOGGED X AND Y DATA POINTS
-    FEHFile* fptr = SD.FOpen("RPS_TEST.txt", "r");
+    FEHFile *fptr = SD.FOpen("RPS_TEST.txt", "r");
     SD.FScanf(fptr, "%f%f", &A_x, &A_y);
+    SD.FScanf(fptr, "%f%f", &B_x, &B_y);
+    SD.FScanf(fptr, "%f%f", &C_x, &C_y);
+    SD.FScanf(fptr, "%f%f", &D_x, &D_y);
+
     FEHFile *ofptr = SD.FOpen("Output.txt", "w");
     SD.FPrintf(ofptr, "X: %f, Y: %f", &A_x, &A_y);
+    SD.FPrintf(ofptr, "X: %f, Y: %f", &B_x, &B_y);
+    SD.FPrintf(ofptr, "X: %f, Y: %f", &C_x, &C_y);
+    SD.FPrintf(ofptr, "X: %f, Y: %f", &D_x, &D_y);
     SD.FClose(ofptr);
     SD.FClose(fptr);
 
