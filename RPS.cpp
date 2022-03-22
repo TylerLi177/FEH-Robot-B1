@@ -125,10 +125,11 @@ void check_x(float x_coordinate, int orientation)
     }
 
     // Check if receiving proper RPS coordinates and whether the robot is within an acceptable range
-    while((RPS.X() >= 0) && (RPS.X() < x_coordinate - 0.5 || RPS.X() > x_coordinate + 0.5))
+    while((RPS.X() >= 0) && (RPS.X() < x_coordinate - 1 || RPS.X() > x_coordinate + 1))
     {
         LCD.WriteLine("X: ");
         LCD.WriteLine(RPS.X());
+        LCD.WriteLine(x_coordinate);
         if(RPS.X() < x_coordinate)
         {
             // Pulse the motors for a short duration in the correct direction
@@ -137,7 +138,7 @@ void check_x(float x_coordinate, int orientation)
         else
         {
             // Pulse the motors for a short duration in the correct direction
-            pulse_forward(power, PULSE_TIME);
+            pulse_forward(-power, PULSE_TIME);
         }
         Sleep(RPS_WAIT_TIME_IN_SEC);
     }
@@ -155,10 +156,11 @@ void check_y(float y_coordinate, int orientation)
     }
 
     // Check if receiving proper RPS coordinates and whether the robot is within an acceptable range
-    while((RPS.Y() >= 0) && (RPS.Y() < y_coordinate - 0.5 || RPS.Y() > y_coordinate + 0.5))
+    while((RPS.Y() >= 0) && (RPS.Y() < y_coordinate - 1 || RPS.Y() > y_coordinate + 1))
     {
         LCD.WriteLine("Y: ");
         LCD.WriteLine(RPS.Y());
+        LCD.WriteLine(y_coordinate);
         if(RPS.Y() < y_coordinate)
         {
             // Pulse the motors for a short duration in the correct direction
@@ -167,7 +169,7 @@ void check_y(float y_coordinate, int orientation)
         else
         {
             // Pulse the motors for a short duration in the correct direction
-           pulse_forward(power, PULSE_TIME);
+           pulse_forward(-power, PULSE_TIME);
         }
         Sleep(RPS_WAIT_TIME_IN_SEC);
     }
@@ -178,27 +180,19 @@ void check_y(float y_coordinate, int orientation)
  */
 void check_heading(float heading)
 {
-    //You will need to fill out this one yourself and take into account
-    //checking for proper RPS data and the edge conditions
-    //(when you want the robot to go to 0 degrees or close to 0 degrees)
-
-    /*
-        SUGGESTED ALGORITHM:
-        1. Check the current orientation of the QR code and the desired orientation of the QR code
-        2. Check if the robot is within the desired threshold for the heading based on the orientation
-        3. Pulse in the correct direction based on the orientation
-    */
-    // Determine the direction of the motors based on the orientation of the QR code 
+    
     int power = PULSE_POWER;
     if(heading == MINUS){
         power = -PULSE_POWER;
     }
 
     // Check if receiving proper RPS coordinates and whether the robot is within an acceptable range
-    while((RPS.Heading() >= 0) && (RPS.Heading() < heading - 2 || RPS.Heading() > heading + 2))
+    float time = TimeNow();
+    while(((RPS.Heading() >= 0) && (RPS.Heading() < heading - 2 || RPS.Heading() > heading + 2)) && (TimeNow() - time < 20.0))
     {
         LCD.WriteLine("Heading: ");
         LCD.WriteLine(RPS.Heading());
+        LCD.WriteLine(heading);
         if(RPS.Heading() < heading)
         {
             // Pulse the motors for a short duration in the correct direction
@@ -207,7 +201,7 @@ void check_heading(float heading)
         else
         {
             // Pulse the motors for a short duration in the correct direction
-            pulse_counterclockwise(power, PULSE_TIME);
+            pulse_counterclockwise(-power, PULSE_TIME);
         }
         Sleep(RPS_WAIT_TIME_IN_SEC);
     }
