@@ -17,6 +17,24 @@
 #define SERVO_MIN 510
 #define SERVO_MAX 2410
 
+// RPS Delay time
+#define RPS_WAIT_TIME_IN_SEC 0.35
+
+// Shaft encoding counts for CrayolaBots
+#define COUNTS_PER_INCH 40.5
+#define COUNTS_PER_DEGREE 2.48
+
+// Defines for pulsing the robot
+#define PULSE_TIME 0.05
+#define PULSE_POWER 30
+
+// Define for the motor power
+#define POWER 25
+
+// Orientation of QR Code
+#define PLUS 0
+#define MINUS 1
+
 DigitalEncoder right_encoder(FEHIO::P1_0);
 DigitalEncoder left_encoder(FEHIO::P3_0);
 FEHMotor right_motor(FEHMotor::Motor1,9.0);
@@ -75,6 +93,40 @@ void move_backward(int percent, int counts, float timeFailSafe) //using encoders
     }
     
     //Turn off motors
+    right_motor.Stop();
+    left_motor.Stop();
+}
+
+/*
+ * Pulse forward a short distance using time
+ */
+void pulse_forward(int percent, float seconds) 
+{
+    // Set both motors to desired percent
+    right_motor.SetPercent(-percent);
+    left_motor.SetPercent(percent);
+
+    // Wait for the correct number of seconds
+    Sleep(seconds);
+
+    // Turn off motors
+    right_motor.Stop();
+    left_motor.Stop();
+}
+
+/*
+ * Pulse counterclockwise a short distance using time
+ */
+void pulse_counterclockwise(int percent, float seconds) 
+{
+    // Set both motors to desired percent
+    right_motor.SetPercent(percent);
+    left_motor.SetPercent(percent);
+
+    // Wait for the correct number of seconds
+    Sleep(seconds);
+
+    // Turn off motors
     right_motor.Stop();
     left_motor.Stop();
 }
@@ -175,6 +227,100 @@ void lineTracking(float fast_motor_percent, float slow_motor_percent){
     }
 }
 
+/* 
+ * Use RPS to move to the desired x_coordinate based on the orientation of the QR code
+ */
+void check_x(float x_coordinate, int orientation)
+{
+    // Determine the direction of the motors based on the orientation of the QR code 
+    int power = PULSE_POWER;
+    if(orientation == MINUS){
+        power = -PULSE_POWER;
+    }
+
+    // Check if receiving proper RPS coordinates and whether the robot is within an acceptable range
+    while((RPS.X() >= 0) && (RPS.X() < x_coordinate - 1 || RPS.X() > x_coordinate + 1))
+    {
+        LCD.WriteLine("X: ");
+        LCD.WriteLine(RPS.X());
+        LCD.WriteLine(x_coordinate);
+        if(RPS.X() < x_coordinate)
+        {
+            // Pulse the motors for a short duration in the correct direction
+            pulse_forward(power, PULSE_TIME);
+        }
+        else
+        {
+            // Pulse the motors for a short duration in the correct direction
+            pulse_forward(-power, PULSE_TIME);
+        }
+        Sleep(RPS_WAIT_TIME_IN_SEC);
+    }
+}
+
+/* 
+ * Use RPS to move to the desired y_coordinate based on the orientation of the QR code
+ */
+void check_y(float y_coordinate, int orientation)
+{
+    // Determine the direction of the motors based on the orientation of the QR code
+    int power = PULSE_POWER;
+    if(orientation == MINUS){
+        power = -PULSE_POWER;
+    }
+
+    // Check if receiving proper RPS coordinates and whether the robot is within an acceptable range
+    while((RPS.Y() >= 0) && (RPS.Y() < y_coordinate - 1 || RPS.Y() > y_coordinate + 1))
+    {
+        LCD.WriteLine("Y: ");
+        LCD.WriteLine(RPS.Y());
+        LCD.WriteLine(y_coordinate);
+        if(RPS.Y() < y_coordinate)
+        {
+            // Pulse the motors for a short duration in the correct direction
+            pulse_forward(power, PULSE_TIME);
+        }
+        else
+        {
+            // Pulse the motors for a short duration in the correct direction
+           pulse_forward(-power, PULSE_TIME);
+        }
+        Sleep(RPS_WAIT_TIME_IN_SEC);
+    }
+}
+
+/* 
+ * Use RPS to move to the desired heading
+ */
+void check_heading(float heading)
+{
+    
+    int power = PULSE_POWER;
+    if(heading == MINUS){
+        power = -PULSE_POWER;
+    }
+
+    // Check if receiving proper RPS coordinates and whether the robot is within an acceptable range
+    float time = TimeNow();
+    while(((RPS.Heading() >= 0) && (RPS.Heading() < heading - 2 || RPS.Heading() > heading + 2)) && (TimeNow() - time < 20.0))
+    {
+        LCD.WriteLine("Heading: ");
+        LCD.WriteLine(RPS.Heading());
+        LCD.WriteLine(heading);
+        if(RPS.Heading() < heading)
+        {
+            // Pulse the motors for a short duration in the correct direction
+            pulse_counterclockwise(power, PULSE_TIME);
+        }
+        else
+        {
+            // Pulse the motors for a short duration in the correct direction
+            pulse_counterclockwise(-power, PULSE_TIME);
+        }
+        Sleep(RPS_WAIT_TIME_IN_SEC);
+    }
+}
+
 void move_bucket_arm(int percent, float seconds){
 
     //Set desired motor percentage
@@ -236,11 +382,24 @@ void move_prong_arm(int percent, float seconds){
 
 int main(void)
 {
+    //Tell the robot which course it's on
+    float touch_x,touch_y;
+    float vanilla_y = 51.7;
+    float vanilla_heading = 135.3;
+
+    RPS.InitializeTouchMenu();
+
+    LCD.WriteLine("RPS & Data Logging Test");
+    LCD.WriteLine("Press Screen To Start");
+    while(!LCD.Touch(&touch_x,&touch_y));
+    while(LCD.Touch(&touch_x,&touch_y));
+
     // get the voltage level and display it to the screen
         LCD.WriteLine("Battery Voltage: ");
         LCD.WriteLine(Battery.Voltage());
         LCD.WriteLine("\n");
         Sleep(0.5);
+
     //Check if the starting light is not red
     while (cds.Value() <= 0.3 || cds.Value() >= 0.7) {
         left_motor.Stop();
@@ -249,29 +408,35 @@ int main(void)
         Sleep(1.0);
     }
 
-    //Move up ramp
-    move_forward(testSpeed, 200, 5.0); //move forward from starting light
+    //Move to ramp
+    move_forward(testSpeed + 10, 200, 5.0); //move forward from starting light
     Sleep(1.0);
-    turn_left(testSpeed, 305); //turn to ramp
+    turn_left(testSpeed + 10, 305); //turn to ramp
     Sleep(1.0);
     move_backward(3 * testSpeed, 500, 5.0); //move up ramp
     move_backward(testSpeed, 300, 5.0); //move up ramp
     Sleep(1.0);
 
+    //Check position after going up ramp
+    check_y(vanilla_y, MINUS);
+
     //move toward ice cream
     turn_right(testSpeed, ninetyDegreeCount + 69);
 
+    //Check position in front of vanilla lever
+    check_heading(vanilla_heading);
+
     //move toward a lever
-    move_forward(testSpeed, 450, 10.0);
+    move_forward(testSpeed, 310, 10.0);
 
     //Flip a lever
-    move_bucket_arm(armSpeed, 2.0);
+    move_bucket_arm(armSpeed, 2.0); //move arm down
     Sleep(1.0);
-    move_backward(slowSpeed, 10, 5.0);
+    move_backward(slowSpeed, 10, 5.0); //move back from lever
     Sleep(1.0);
-    move_forward(slowSpeed, 8, 5.0);
+    move_forward(slowSpeed, 8, 5.0); //move back into lever
     Sleep(5.0);
-    move_bucket_arm(-2 * armSpeed, 2.0);
+    move_bucket_arm(-2 * armSpeed, 2.0); //move arm back up
 
     Sleep(2.0);
 
