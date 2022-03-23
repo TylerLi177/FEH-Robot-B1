@@ -385,7 +385,13 @@ int main(void)
     //Tell the robot which course it's on
     float touch_x,touch_y;
     float vanilla_y = 51.7;
-    float vanilla_heading = 135.3;
+    float twist_y = 57.6;
+    float chocolate_y = 58.5;
+    float goingDown_x = 20.0;
+    float goingDown_heading = 88.7;
+    float icecream_heading = 135.3;
+    float dowmRamp_y = 13.0;
+    float finalButton_heading = 137.0;
 
     RPS.InitializeTouchMenu();
 
@@ -417,17 +423,71 @@ int main(void)
     move_backward(testSpeed, 300, 5.0); //move up ramp
     Sleep(1.0);
 
-    //Check position after going up ramp
-    check_y(vanilla_y, MINUS);
+    // Check which ice cream lever to flip
+    if(RPS.GetIceCream() == 0)
+    {
+        // Flip vanilla lever
+        check_y(vanilla_y, MINUS);
 
-    //move toward ice cream
-    turn_right(testSpeed, ninetyDegreeCount + 69);
+        Sleep(1.0);
 
-    //Check position in front of vanilla lever
-    check_heading(vanilla_heading);
+        //move toward ice cream
+        turn_right(testSpeed, ninetyDegreeCount + 69);
 
-    //move toward a lever
-    move_forward(testSpeed, 310, 10.0);
+        Sleep(1.0);
+
+        //Check position in front of vanilla lever
+        check_heading(icecream_heading);
+
+        Sleep(1.0);
+
+        //move toward a lever
+        move_forward(testSpeed, 310, 10.0);
+    } 
+    else if(RPS.GetIceCream() == 1)
+    {
+        // Flip twist lever
+        check_y(twist_y, MINUS);
+
+        Sleep(1.0);
+
+        //move toward ice cream
+        turn_right(testSpeed, ninetyDegreeCount + 69);
+
+        Sleep(1.0);
+
+        //Check position in front of vanilla lever
+        check_heading(icecream_heading);
+
+        Sleep(1.0);
+
+        //move toward a lever
+        move_forward(testSpeed, 200, 10.0);
+    }
+    else if(RPS.GetIceCream() == 2)
+    {
+       // Flip chocolate lever
+       check_y(chocolate_y, MINUS);
+
+       move_backward(testSpeed, 20, 10.0);
+
+        Sleep(1.0);
+
+       //move toward ice cream
+        turn_right(testSpeed, ninetyDegreeCount + 69);
+
+        Sleep(1.0);
+
+        //Check position in front of vanilla lever
+        check_heading(icecream_heading);
+
+        Sleep(1.0);
+
+        //move toward a lever
+        move_forward(testSpeed, 15, 10.0);
+    }
+
+    Sleep(1.0);
 
     //Flip a lever
     move_bucket_arm(armSpeed, 2.0); //move arm down
@@ -436,7 +496,31 @@ int main(void)
     Sleep(1.0);
     move_forward(slowSpeed, 8, 5.0); //move back into lever
     Sleep(5.0);
-    move_bucket_arm(-2 * armSpeed, 2.0); //move arm back up
+    move_bucket_arm(-2 * armSpeed, 1.0); //move arm back up
+    Sleep(1.0);
+
+    //back up from lever
+    move_backward(testSpeed, 200, 5.0);
+    Sleep(1.0);
+    check_x(goingDown_x, MINUS);
+    Sleep(1.0);
+
+    //Move down ramp
+    turn_right(testSpeed, 80);
+    Sleep(1.0);
+    check_heading(goingDown_heading);
+    Sleep(1.0);
+    move_backward(testSpeed, 750, 10.0);
+    Sleep(1.0);
+    check_y(dowmRamp_y, PLUS);
+    Sleep(1.0);
+
+    //Final button
+    turn_left(testSpeed, 100);
+    Sleep(1.0);
+    check_heading(finalButton_heading);
+    Sleep(1.0);
+    move_backward(2 * testSpeed, 200, 5.0);
 
     Sleep(2.0);
 
