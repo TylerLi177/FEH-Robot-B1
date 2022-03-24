@@ -58,7 +58,7 @@ void check_starting_light(float lowerbound, float upperbound){
         }
 }
 
-void move_forward(int percent, int counts, float timeFailSafe) //using encoders
+void move_forward(int percent, float counts, float timeFailSafe) //using encoders
 {
     //Reset encoder counts
     right_encoder.ResetCounts();
@@ -82,7 +82,7 @@ void move_forward(int percent, int counts, float timeFailSafe) //using encoders
     left_motor.Stop();
 }
 
-void move_backward(int percent, int counts, float timeFailSafe) //using encoders
+void move_backward(int percent, float counts, float timeFailSafe) //using encoders
 {
     //Reset encoder counts
     right_encoder.ResetCounts();
@@ -391,7 +391,7 @@ void move_prong_arm(int percent, float seconds){
 
 int main(void)
 {
-    //Tell the robot which course it's on
+    
     float touch_x,touch_y;
     float vanilla_y = 51.7;
     float twist_y = 58.5;
@@ -402,6 +402,7 @@ int main(void)
     float dowmRamp_y = 13.0;
     float finalButton_heading = 137.0;
 
+    //Tell the robot which course it's on
     RPS.InitializeTouchMenu();
 
     LCD.WriteLine("RPS & Data Logging Test");
@@ -445,8 +446,26 @@ int main(void)
 
         Sleep(1.0);
 
-        //move toward a lever
-        move_forward(testSpeed, 315, 10.0);
+        //Keep running until it detects the black line
+
+        right_motor.SetPercent(-testSpeed);
+        left_motor.SetPercent(testSpeed);
+
+        bool keepMoving = true;
+        while ((left_opt.Value() < 1.5 || middle_opt.Value() < 1.0 || right_opt.Value() < 2.0) && keepMoving){
+            right_motor.SetPercent(-testSpeed);
+            left_motor.SetPercent(testSpeed);
+
+            if (left_opt.Value() >= 1.5 || middle_opt.Value() >= 1.0 || right_opt.Value() >= 2.0) {
+                right_motor.Stop();
+                left_motor.Stop();
+
+                Sleep(1.0);
+
+                move_forward(slowSpeed, 6, 5.0);
+                keepMoving = false;
+            }
+        }
     } 
     else if(RPS.GetIceCream() == 1)
     {
@@ -454,6 +473,8 @@ int main(void)
         check_y(twist_y, MINUS);
 
         Sleep(1.0);
+
+        move_backward(slowSpeed, 3, 5.0);
 
         //move toward ice cream
         turn_right(testSpeed, ninetyDegreeCount + 69);
@@ -465,25 +486,41 @@ int main(void)
 
         Sleep(1.0);
 
-        //move toward a lever
-        move_forward(testSpeed, 200, 10.0);
+        //Keep running until it detects the black line
 
-        move_backward(testSpeed, 1, 10.0);
+        right_motor.SetPercent(-testSpeed);
+        left_motor.SetPercent(testSpeed);
+
+        bool keepMoving = true;
+        while ((left_opt.Value() < 1.5 || middle_opt.Value() < 1.0 || right_opt.Value() < 2.0) && keepMoving){
+        
+
+            if (left_opt.Value() >= 1.5 || middle_opt.Value() >= 1.0 || right_opt.Value() >= 2.0) {
+                right_motor.Stop();
+                left_motor.Stop();
+
+                Sleep(1.0);
+
+                move_forward(slowSpeed, 6, 5.0);
+                keepMoving = false;
+            }
+        }
+
     }
     else if(RPS.GetIceCream() == 2)
     {
 
        // Flip chocolate lever
-        move_backward(testSpeed, 2, 10.0); //move closer to the chocolate
+        move_backward(slowSpeed, 5, 10.0); //move closer to the chocolate
 
        check_y(chocolate_y, MINUS); //Check y position for chcocolate
 
-       move_backward(testSpeed, 10, 10.0); //move closer to the chocolate
+       move_backward(slowSpeed, 10, 10.0); //move closer to the chocolate
 
         Sleep(1.0);
 
        //move toward ice cream
-        turn_right(testSpeed, ninetyDegreeCount + 75);
+        turn_left(testSpeed, 350);
 
         Sleep(1.0);
 
@@ -498,18 +535,23 @@ int main(void)
 
     Sleep(1.0);
 
-    //Flip a lever
-    move_bucket_arm(armSpeed, 2.0); //move arm down
+    //Flip the lever
+    move_bucket_arm(3 * armSpeed, 1.5); //move arm down
     Sleep(1.0);
+    // move_backward(slowSpeed, 0.2, 5.0); //Back up in case lever does not go down bc torque or something
+    // Sleep(1.0);
+    // move_bucket_arm(-3 * armSpeed, 1.0); //move arm back up in case lever doesn't go down
+    // move_bucket_arm(3 * armSpeed, 1.0); //move arm back down for a second try just in case
+    // Sleep(1.0);
     move_backward(slowSpeed, 10, 5.0); //move back from lever
     Sleep(1.0);
     move_bucket_arm(armSpeed, 0.5); //move arm down
     Sleep(1.0);
-    move_forward(slowSpeed, 10, 5.0); //move back into lever
+    move_forward(slowSpeed, 12, 5.0); //move back into lever
     Sleep(5.0);
-    move_bucket_arm(-3 * armSpeed, 1.0); //move arm back up
+    move_bucket_arm(-4 * armSpeed, 1.0); //move arm back up
     Sleep(1.0);
-    move_bucket_arm(armSpeed, 0.5); //move arm back down little
+    move_bucket_arm(armSpeed, 1.5); //move arm back down little
     Sleep(1.0);
 
     //back up from lever
@@ -519,7 +561,7 @@ int main(void)
     Sleep(1.0);
 
     //Move down ramp
-    turn_right(testSpeed, 85); //turn to face the ramp
+    turn_right(testSpeed, 90); //turn to face the ramp
     Sleep(1.0);
     check_heading(goingDown_heading); //check the angle of the robot
     Sleep(1.0);
@@ -567,4 +609,5 @@ int main(void)
     Buzzer.Tone(FEHBuzzer::C6, 1000);
 
     LCD.WriteLine("Hell yeah");    
+
 }
