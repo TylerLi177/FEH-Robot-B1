@@ -51,6 +51,12 @@ DigitalInputPin bump_switch2(FEHIO::P3_2);
 
 void check_starting_light(float lowerbound, float upperbound){
     while (cds.Value() <= lowerbound || cds.Value() >= upperbound) {
+        LCD.Write(left_opt.Value());
+        LCD.Write("\t");
+        LCD.Write(middle_opt.Value());
+        LCD.Write("\t");
+        LCD.Write(right_opt.Value());
+        LCD.WriteLine("\n");
             left_motor.Stop();
             right_motor.Stop();
             LCD.WriteLine(cds.Value());
@@ -452,11 +458,11 @@ int main(void)
         left_motor.SetPercent(testSpeed);
 
         bool keepMoving = true;
-        while ((left_opt.Value() < 1.5 || middle_opt.Value() < 1.0 || right_opt.Value() < 2.0) && keepMoving){
+        while ((left_opt.Value() < 1.5 || middle_opt.Value() < 1.0) && keepMoving){
             right_motor.SetPercent(-testSpeed);
             left_motor.SetPercent(testSpeed);
 
-            if (left_opt.Value() >= 1.5 || middle_opt.Value() >= 1.0 || right_opt.Value() >= 2.0) {
+            if (left_opt.Value() >= 1.5 || middle_opt.Value() >= 1.0) {
                 right_motor.Stop();
                 left_motor.Stop();
 
@@ -492,10 +498,10 @@ int main(void)
         left_motor.SetPercent(testSpeed);
 
         bool keepMoving = true;
-        while ((left_opt.Value() < 1.5 || middle_opt.Value() < 1.0 || right_opt.Value() < 2.0) && keepMoving){
+        while ((left_opt.Value() < 1.5 || middle_opt.Value() < 1.0) && keepMoving){
         
 
-            if (left_opt.Value() >= 1.5 || middle_opt.Value() >= 1.0 || right_opt.Value() >= 2.0) {
+            if (left_opt.Value() >= 1.5 || middle_opt.Value() >= 1.0) {
                 right_motor.Stop();
                 left_motor.Stop();
 
@@ -510,27 +516,43 @@ int main(void)
     else if(RPS.GetIceCream() == 2)
     {
 
-       // Flip chocolate lever
-        move_backward(slowSpeed, 5, 10.0); //move closer to the chocolate
-
-       check_y(chocolate_y, MINUS); //Check y position for chcocolate
-
-       move_backward(slowSpeed, 10, 10.0); //move closer to the chocolate
+       // Flip twist lever
+        check_y(chocolate_y, MINUS);
 
         Sleep(1.0);
 
-       //move toward ice cream
-        turn_left(testSpeed, 350);
+        move_backward(slowSpeed, 3, 5.0);
+
+        //move toward ice cream
+        turn_right(testSpeed, ninetyDegreeCount + 80);
 
         Sleep(1.0);
 
         //Check position in front of vanilla lever
-        check_heading(icecream_heading);
+        check_heading(119.0);
 
         Sleep(1.0);
 
-        //move toward a lever
-        move_forward(testSpeed, 3, 10.0);
+        //Keep running until it detects the black line
+
+        right_motor.SetPercent(-testSpeed);
+        left_motor.SetPercent(testSpeed);
+
+        bool keepMoving = true;
+        while ((left_opt.Value() < 1.5 || middle_opt.Value() < 1.0) && keepMoving){
+        
+
+            if (left_opt.Value() >= 1.5 || middle_opt.Value() >= 1.0) {
+                right_motor.Stop();
+                left_motor.Stop();
+
+                Sleep(1.0);
+
+                move_forward(slowSpeed, 6, 5.0);
+                keepMoving = false;
+            }
+        }
+
     }
 
     Sleep(1.0);
