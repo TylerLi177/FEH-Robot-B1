@@ -336,6 +336,36 @@ void check_heading(float heading)
     }
 }
 
+void celebrate(){
+    Buzzer.Tone(FEHBuzzer::G3, 83);
+    Buzzer.Tone(FEHBuzzer::C4, 83);
+    Buzzer.Tone(FEHBuzzer::E4, 83);
+    Buzzer.Tone(FEHBuzzer::G4, 83);
+    Buzzer.Tone(FEHBuzzer::C5, 83);
+    Buzzer.Tone(FEHBuzzer::E5, 83);
+    Buzzer.Tone(FEHBuzzer::G5, 250);
+    Buzzer.Tone(FEHBuzzer::E5, 250);
+    Buzzer.Tone(FEHBuzzer::Af3, 83);
+    Buzzer.Tone(FEHBuzzer::C4, 83);
+    Buzzer.Tone(FEHBuzzer::Ef4, 83);
+    Buzzer.Tone(FEHBuzzer::Af4, 83);
+    Buzzer.Tone(FEHBuzzer::C5, 83);
+    Buzzer.Tone(FEHBuzzer::Ef5, 83);
+    Buzzer.Tone(FEHBuzzer::Af5, 250);
+    Buzzer.Tone(FEHBuzzer::E5, 250);
+    Buzzer.Tone(FEHBuzzer::Bf3, 83);
+    Buzzer.Tone(FEHBuzzer::D4, 83);
+    Buzzer.Tone(FEHBuzzer::F4, 83);
+    Buzzer.Tone(FEHBuzzer::Bf4, 83);
+    Buzzer.Tone(FEHBuzzer::D5, 83);
+    Buzzer.Tone(FEHBuzzer::F5, 83);
+    Buzzer.Tone(FEHBuzzer::Bf5, 250);
+    Buzzer.Tone(FEHBuzzer::Bf5, 83);
+    Buzzer.Tone(FEHBuzzer::Bf5, 83);
+    Buzzer.Tone(FEHBuzzer::Bf5, 83);
+    Buzzer.Tone(FEHBuzzer::C6, 1000);
+}
+
 void move_bucket_arm(int percent, float seconds){
 
     //Set desired motor percentage
@@ -397,7 +427,7 @@ void move_prong_arm(int percent, float seconds){
 
 int main(void)
 {
-    
+    //intitalize RPS values
     float touch_x,touch_y;
     float vanilla_y = 51.7;
     float twist_y = 58.5;
@@ -480,7 +510,7 @@ int main(void)
 
         Sleep(1.0);
 
-        move_backward(slowSpeed, 3, 5.0);
+        move_backward(slowSpeed, 2, 5.0);
 
         //move toward ice cream
         turn_right(testSpeed, ninetyDegreeCount + 69);
@@ -560,11 +590,6 @@ int main(void)
     //Flip the lever
     move_bucket_arm(3 * armSpeed, 1.5); //move arm down
     Sleep(1.0);
-    // move_backward(slowSpeed, 0.2, 5.0); //Back up in case lever does not go down bc torque or something
-    // Sleep(1.0);
-    // move_bucket_arm(-3 * armSpeed, 1.0); //move arm back up in case lever doesn't go down
-    // move_bucket_arm(3 * armSpeed, 1.0); //move arm back down for a second try just in case
-    // Sleep(1.0);
     move_backward(slowSpeed, 10, 5.0); //move back from lever
     Sleep(1.0);
     move_bucket_arm(armSpeed, 0.5); //move arm down
@@ -597,38 +622,12 @@ int main(void)
     Sleep(1.0);
     check_heading(finalButton_heading); //Check if the robot is aligned with the button
     Sleep(1.0);
-    move_backward(2 * testSpeed, 250, 5.0); //Ram that shit into the button
+    move_backward(2 * testSpeed, 500, 5.0); //Ram that shit into the button
 
     Sleep(2.0);
 
     //Celebrate that the code ran all the way through
-    Buzzer.Tone(FEHBuzzer::G3, 83);
-    Buzzer.Tone(FEHBuzzer::C4, 83);
-    Buzzer.Tone(FEHBuzzer::E4, 83);
-    Buzzer.Tone(FEHBuzzer::G4, 83);
-    Buzzer.Tone(FEHBuzzer::C5, 83);
-    Buzzer.Tone(FEHBuzzer::E5, 83);
-    Buzzer.Tone(FEHBuzzer::G5, 250);
-    Buzzer.Tone(FEHBuzzer::E5, 250);
-    Buzzer.Tone(FEHBuzzer::Af3, 83);
-    Buzzer.Tone(FEHBuzzer::C4, 83);
-    Buzzer.Tone(FEHBuzzer::Ef4, 83);
-    Buzzer.Tone(FEHBuzzer::Af4, 83);
-    Buzzer.Tone(FEHBuzzer::C5, 83);
-    Buzzer.Tone(FEHBuzzer::Ef5, 83);
-    Buzzer.Tone(FEHBuzzer::Af5, 250);
-    Buzzer.Tone(FEHBuzzer::E5, 250);
-    Buzzer.Tone(FEHBuzzer::Bf3, 83);
-    Buzzer.Tone(FEHBuzzer::D4, 83);
-    Buzzer.Tone(FEHBuzzer::F4, 83);
-    Buzzer.Tone(FEHBuzzer::Bf4, 83);
-    Buzzer.Tone(FEHBuzzer::D5, 83);
-    Buzzer.Tone(FEHBuzzer::F5, 83);
-    Buzzer.Tone(FEHBuzzer::Bf5, 250);
-    Buzzer.Tone(FEHBuzzer::Bf5, 83);
-    Buzzer.Tone(FEHBuzzer::Bf5, 83);
-    Buzzer.Tone(FEHBuzzer::Bf5, 83);
-    Buzzer.Tone(FEHBuzzer::C6, 1000);
+    celebrate();
 
     LCD.WriteLine("Hell yeah");    
 
