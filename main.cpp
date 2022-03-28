@@ -64,7 +64,7 @@ void check_starting_light(float lowerbound, float upperbound){
         }
 }
 
-void move_forward(int percent, float counts, float timeFailSafe) //using encoders
+void move_backward(int percent, float counts, float timeFailSafe) //using encoders
 {
     //Reset encoder counts
     right_encoder.ResetCounts();
@@ -88,7 +88,7 @@ void move_forward(int percent, float counts, float timeFailSafe) //using encoder
     left_motor.Stop();
 }
 
-void move_backward(int percent, float counts, float timeFailSafe) //using encoders
+void move_forward(int percent, float counts, float timeFailSafe) //using encoders
 {
     //Reset encoder counts
     right_encoder.ResetCounts();
@@ -208,16 +208,16 @@ left_motor.Stop();
 
 void lineTracking(float fast_motor_percent, float slow_motor_percent){
 
-    left_motor.SetPercent(-1 * fast_motor_percent);
-    right_motor.SetPercent(fast_motor_percent);
+    left_motor.SetPercent(fast_motor_percent);
+    right_motor.SetPercent(-fast_motor_percent);
     LCD.Write("Sexy\n");
 
     //See if the left and middle sensor are off the track
     while (left_opt.Value() <= 2.0 && middle_opt.Value() <= 1.0) {
 
         //Set the right wheel to go slower
-        left_motor.SetPercent(-1 * fast_motor_percent);
-        right_motor.SetPercent(slow_motor_percent);
+        left_motor.SetPercent(fast_motor_percent);
+        right_motor.SetPercent(-slow_motor_percent);
 
         //Set the right wheel to go slower
         LCD.Write("Going Right\n");
@@ -229,9 +229,9 @@ void lineTracking(float fast_motor_percent, float slow_motor_percent){
     }
 
     //See if the middle and right sensor are off the track
-    while (middle_opt.Value() <= 1.0 && right_opt.Value() <= 2.0) {
-        left_motor.SetPercent(-1 * slow_motor_percent);
-        right_motor.SetPercent(fast_motor_percent);
+    while (middle_opt.Value() <= 1.0 && right_opt.Value() <= 2.5) {
+        left_motor.SetPercent(slow_motor_percent);
+        right_motor.SetPercent(-fast_motor_percent);
 
         LCD.Write("Going Left\n");
 
@@ -440,7 +440,7 @@ int main(void)
     float first_turn_x = 18.7;
     float first_turn_y = 18.5;
     float first_turn_heading = 180.0;
-    float tray_turn_x = 7.3;
+    float tray_turn_x = 10.0;
     float tray_turn_heading = 93.0;
     float before_color_heading = 92.6;
     float jukebox_light_y = 15.3;
@@ -467,49 +467,81 @@ int main(void)
     check_starting_light(0.3, 0.7);
 
     //Move to ramp
-    move_forward(testSpeed + 10, 200, 5.0); //move forward from starting light
+    move_forward(2 * testSpeed, 200, 5.0); //move forward from starting light
     Sleep(1.0);
     
     check_y(first_turn_y, MINUS);
 
+    //turn to go to trash can
     turn_left(testSpeed, 100);
 
     check_heading(first_turn_heading);
 
     //Correct position against wall
     for (int i = 0; bump_switch1.Value() == 1 || bump_switch2.Value() == 1; i++){
-        move_forward(testSpeed, i, 5.0);
+        move_forward(2 * testSpeed, i, 5.0);
     }
 
+    //pulse back to line up with the trash can
     check_x(tray_turn_x, PLUS);
 
+    //turn to trash can
     turn_right(testSpeed, ninetyDegreeCount);
 
     check_heading(tray_turn_heading);
 
-    //Correct position against trash can
+    //Keep moving until at least one of the bump switches is against the trash can
     for (int i = 0; bump_switch1.Value() == 1 && bump_switch2.Value() == 1; i++){
         move_forward(testSpeed, i, 5.0);
     }
 
-    right_motor.SetPercent(-slowSpeed);
-    left_motor.SetPercent(-slowSpeed);
+    //move bucket arm down
+    move_bucket_arm(armSpeed, 1.75);
 
-        bool keepMoving = true;
-        while ((middle_opt.Value() < 1.0) && keepMoving){
+    //move back from trash can
+    move_backward(slowSpeed, 2, 5.0);
+
+    //move bucket arm  back up
+    move_bucket_arm(-armSpeed, 1.75);
+
+    //turn until optosensors find black line
+    right_motor.SetPercent(slowSpeed);
+    left_motor.SetPercent(slowSpeed);
+
+    bool keepMoving = true;
+    while ((middle_opt.Value() < 1.0) && keepMoving){
         
 
-            if (middle_opt.Value() >= 1.0) {
-                right_motor.Stop();
-                left_motor.Stop();
+        if (middle_opt.Value() >= 1.0) {
+            right_motor.Stop();
+            left_motor.Stop();
 
-                Sleep(1.0);
+            Sleep(1.0);
 
-                keepMoving = false;
-            }
+            keepMoving = false;
         }
+    }
 
+    //do line following
     lineTracking(slowSpeed, 6.9);
 
-    
+    //check whether the cds light is red or blue and stop
+    if (cds.Value() >= 0.3 && cds.Value() <= 2.0) {
+            left_motor.Stop();
+            right_motor.Stop();
+            LCD.WriteLine("Light Detected");
+            LCD.WriteLine(cds.Value());
+            Sleep(1.0);
+
+            if (cds.Value() >= 0.3 && cds.Value() <= 0.7){
+                LCD.WriteLine("RED");
+            }
+            else {
+                LCD.WriteLine("BLUE");
+            }
+    }
+    else {
+        LCD.WriteLine("Aya, why you so failure");
+        SLeep(1.0);
+    }
 }
