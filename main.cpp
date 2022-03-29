@@ -12,7 +12,7 @@
 #include <stdio.h>
 #define testSpeed 25
 #define slowSpeed 15
-#define armSpeed 10
+#define armSpeed 10 
 #define ninetyDegreeCount 220
 #define SERVO_MIN 510
 #define SERVO_MAX 2410
@@ -42,7 +42,7 @@ FEHMotor left_motor(FEHMotor::Motor0,9.0);
 AnalogInputPin cds(FEHIO::P0_1);
 AnalogInputPin left_opt(FEHIO::P2_7);
 AnalogInputPin middle_opt(FEHIO::P2_0);
-AnalogInputPin right_opt(FEHIO::P1_4);
+AnalogInputPin right_opt(FEHIO::P1_3);
 FEHMotor bucket_arm(FEHMotor::Motor2,9.0);
 FEHServo sliding_arm(FEHServo::Servo0); 
 FEHMotor prong_arm(FEHMotor::Motor3,9.0);
@@ -207,7 +207,7 @@ left_motor.Stop();
 }
 
 void lineTracking(float fast_motor_percent, float slow_motor_percent){
-
+    
     left_motor.SetPercent(fast_motor_percent);
     right_motor.SetPercent(-fast_motor_percent);
     LCD.Write("Sexy\n");
@@ -229,7 +229,7 @@ void lineTracking(float fast_motor_percent, float slow_motor_percent){
     }
 
     //See if the middle and right sensor are off the track
-    while (middle_opt.Value() <= 1.0 && right_opt.Value() <= 2.5) {
+    while (middle_opt.Value() <= 1.0 && right_opt.Value() <= 3.2) {
         left_motor.SetPercent(slow_motor_percent);
         right_motor.SetPercent(-fast_motor_percent);
 
@@ -441,13 +441,18 @@ int main(void)
     float first_turn_y = 18.5;
     float first_turn_heading = 180.0;
     float tray_turn_x = 10.0;
+    float jukebox_light_x = 12.0;
     float tray_turn_heading = 93.0;
     float before_color_heading = 92.6;
-    float jukebox_light_y = 15.3;
+    float jukebox_light_y = 14.0;
     float after_color_y = 17.9;
     float turn_ramp_1_heading = 181.9;
-    float turn_ramp_1_x = 21.5;
+    float turn_ramp_1_x = 22.0;
     float turn_ramp_2_heading = 273.0;
+    float burger_flip_1_heading = 5.0;
+    float burger_flip_x = 27.6;
+    float burger_flip_y = 62.8;
+    float burger_flip_2_heading = 276.0;
 
     //Tell the robot which course it's on
     RPS.InitializeTouchMenu();
@@ -465,6 +470,9 @@ int main(void)
 
     //Check if the starting light is not red
     check_starting_light(0.3, 0.7);
+    
+    //move bucket arm down
+    move_bucket_arm(armSpeed, 0.85);
 
     //Move to ramp
     move_forward(2 * testSpeed, 200, 5.0); //move forward from starting light
@@ -479,8 +487,11 @@ int main(void)
 
     //Correct position against wall
     for (int i = 0; bump_switch1.Value() == 1 || bump_switch2.Value() == 1; i++){
-        move_forward(2 * testSpeed, i, 5.0);
+        move_forward(testSpeed + 10, i, 5.0);
     }
+
+    //move back to line up with the trash can
+    move_backward(slowSpeed + 5, 10, 5.0);
 
     //pulse back to line up with the trash can
     check_x(tray_turn_x, PLUS);
@@ -496,7 +507,7 @@ int main(void)
     }
 
     //move bucket arm down
-    move_bucket_arm(armSpeed, 1.75);
+    move_bucket_arm(armSpeed, 0.9);
 
     //move back from trash can
     move_backward(slowSpeed, 2, 5.0);
@@ -504,15 +515,29 @@ int main(void)
     //move bucket arm  back up
     move_bucket_arm(-armSpeed, 1.75);
 
-    //turn until optosensors find black line
-    right_motor.SetPercent(slowSpeed);
-    left_motor.SetPercent(slowSpeed);
+    //move back from trash can
+    move_backward(slowSpeed + 5, 3, 5.0);
+
+    //turn from tray
+    turn_left(testSpeed, ninetyDegreeCount);
+    Sleep(0.25);
+    check_heading(first_turn_heading);
+
+    //move away from tray
+    //move_backward(slowSpeed + 5, 5, 3.0);
+    check_x(jukebox_light_x + 0.5, PLUS);
+    Sleep(0.25);
+    turn_right(testSpeed, ninetyDegreeCount);
+    check_heading(before_color_heading);
+
+
+    right_motor.SetPercent(-testSpeed);
+    left_motor.SetPercent(testSpeed);
 
     bool keepMoving = true;
-    while ((middle_opt.Value() < 1.0) && keepMoving){
-        
+    while ((cds.Value() < 0.3 || cds.Value() > 2.0) && keepMoving){
 
-        if (middle_opt.Value() >= 1.0) {
+        if ((cds.Value() >= 0.3) && (cds.Value() <= 2.0)) {
             right_motor.Stop();
             left_motor.Stop();
 
@@ -522,8 +547,9 @@ int main(void)
         }
     }
 
-    //do line following
-    lineTracking(slowSpeed, 6.9);
+    check_y(jukebox_light_y, MINUS);
+
+    check_heading(before_color_heading);
 
     //check whether the cds light is red or blue and stop
     if (cds.Value() >= 0.3 && cds.Value() <= 2.0) {
@@ -535,13 +561,138 @@ int main(void)
 
             if (cds.Value() >= 0.3 && cds.Value() <= 0.7){
                 LCD.WriteLine("RED");
+
+                move_backward(slowSpeed, 5, 5.0);
+
+                right_motor.SetPercent(-20);
+                left_motor.SetPercent(-20);
+                keepMoving = true;
+
+                while ((middle_opt.Value() < 0.7) && keepMoving){
+                if (middle_opt.Value() >= 0.7) {
+                    right_motor.Stop();
+                    left_motor.Stop();
+
+                    Sleep(1.0);
+
+                    keepMoving = false;
+                    }
+                }
+                move_backward(20, 10.0, 1.5);
+                move_forward(testSpeed, 8.0, 1.5);
+                turn_left(testSpeed, ninetyDegreeCount);
+
+                //check heading before moving towards ramp
+                check_heading(turn_ramp_1_heading);
+
+                //move towards ramp
+                move_backward(testSpeed, 40, 5.0);
+
+                //check x value before turning
+                check_x(turn_ramp_1_x, PLUS);
             }
             else {
                 LCD.WriteLine("BLUE");
+
+                move_backward(slowSpeed, 5, 5.0);
+
+                right_motor.SetPercent(20);
+                left_motor.SetPercent(20);
+                keepMoving = true;
+
+                while ((middle_opt.Value() < 0.7) && keepMoving){
+                if (middle_opt.Value() >= 0.7) {
+                    right_motor.Stop();
+                    left_motor.Stop();
+
+                    Sleep(1.0);
+
+                    keepMoving = false;
+                    }
+                }
+                
+                move_backward(20, 10.0, 1.5);
+                move_forward(testSpeed, 5.0, 1.5);
+                turn_left(testSpeed, ninetyDegreeCount - 10);
+
+                //check heading before moving towards ramp
+                check_heading(turn_ramp_1_heading);
+
+                //move towards ramp
+                move_backward(testSpeed, 70, 5.0);
+
+                //check x value before turning
+                check_x(turn_ramp_1_x, PLUS);
             }
     }
     else {
         LCD.WriteLine("Aya, why you so failure");
-        SLeep(1.0);
+        Sleep(1.0);
     }
+
+
+    //turn to ramp
+    turn_left(testSpeed, ninetyDegreeCount);
+
+    Sleep(0.25);
+
+    check_heading(turn_ramp_2_heading);
+
+    // move up ramp
+    move_backward(65, 600, 10.0);
+
+    //Move to burger flip
+    turn_left(testSpeed, ninetyDegreeCount);
+    Sleep(0.25);
+    check_heading(burger_flip_1_heading);
+
+    //Correct position against wall
+    for (int i = 0; bump_switch1.Value() == 1 || bump_switch2.Value() == 1; i++){
+        move_forward(testSpeed, i, 5.0);
+    }
+
+    // move in front of burger flip
+    move_backward(20, 20.0, 5.0);
+    Sleep(0.25);
+
+    // check x before turning
+    check_x(burger_flip_x, PLUS);
+
+    //turn to burger flip
+    turn_right(testSpeed, ninetyDegreeCount + 1);
+    Sleep(0.25);
+
+    //check heading
+    check_heading(burger_flip_2_heading);
+
+    right_motor.SetPercent(-testSpeed);
+    left_motor.SetPercent(testSpeed);
+
+    keepMoving = true;
+    while ((middle_opt.Value() < 1.0) && keepMoving){
+        
+
+        if (middle_opt.Value() >= 1.0) {
+            right_motor.Stop();
+            left_motor.Stop();
+
+            Sleep(1.0);
+
+            move_forward(slowSpeed, 6, 5.0);
+            keepMoving = false;
+        }
+    }
+
+    //check heading
+    check_heading(burger_flip_2_heading);
+
+    // move closer to ramp then check with rps
+    move_backward(20, 4.0, 1.0);
+    Sleep(0.25);
+
+    check_y(burger_flip_y, PLUS);
+
+    //Flip burger
+    move_prong_arm(5 * armSpeed, 0.5);
+    move_prong_arm(-5 * armSpeed, 0.5);
 }
