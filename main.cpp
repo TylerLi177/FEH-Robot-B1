@@ -48,6 +48,7 @@ FEHServo sliding_arm(FEHServo::Servo0);
 FEHMotor prong_arm(FEHMotor::Motor3,9.0);
 DigitalInputPin bump_switch1(FEHIO::P0_3);
 DigitalInputPin bump_switch2(FEHIO::P3_2);
+DigitalInputPin bump_switch3(FEHIO::P3_4);
 
 void check_starting_light(float lowerbound, float upperbound){
     while (cds.Value() <= lowerbound || cds.Value() >= upperbound) {
@@ -429,7 +430,7 @@ int main(void)
 {
     //intitalize RPS values
     float touch_x,touch_y;
-    float vanilla_y = 51.7;
+    float vanilla_y = 51.0;
     float twist_y = 58.5;
     float chocolate_y = 58.5;
     float goingDown_x = 20.5;
@@ -450,9 +451,12 @@ int main(void)
     float turn_ramp_1_x = 22.0;
     float turn_ramp_2_heading = 273.0;
     float burger_flip_1_heading = 5.0;
-    float burger_flip_x = 27.6;
-    float burger_flip_y = 62.8;
-    float burger_flip_2_heading = 276.0;
+    float burger_flip_x = 25.0;
+    float burger_flip_y = 63.5;
+    float burger_flip_2_heading = 273.0;
+    float sliding_ticket_heading = 92.6;
+    float before_icecream_x = 17.0;
+    float before_icecream_heading = 273.0;
 
     //Tell the robot which course it's on
     RPS.InitializeTouchMenu();
@@ -471,12 +475,16 @@ int main(void)
     //Check if the starting light is not red
     check_starting_light(0.3, 0.7);
     
+    /*
+    *TRAY DUMP
+    */
+
     //move bucket arm down
     move_bucket_arm(armSpeed, 0.85);
 
     //Move to ramp
     move_forward(2 * testSpeed, 200, 5.0); //move forward from starting light
-    Sleep(1.0);
+    Sleep(0.25);
     
     check_y(first_turn_y, MINUS);
 
@@ -485,10 +493,14 @@ int main(void)
 
     check_heading(first_turn_heading);
 
+    right_motor.SetPercent(testSpeed + 10);
+    left_motor.SetPercent(-testSpeed - 10);
+
     //Correct position against wall
-    for (int i = 0; bump_switch1.Value() == 1 || bump_switch2.Value() == 1; i++){
-        move_forward(testSpeed + 10, i, 5.0);
-    }
+    while (bump_switch1.Value() == 1 || bump_switch2.Value() == 1);
+
+    right_motor.Stop();
+    left_motor.Stop();
 
     //move back to line up with the trash can
     move_backward(slowSpeed + 5, 10, 5.0);
@@ -502,9 +514,14 @@ int main(void)
     check_heading(tray_turn_heading);
 
     //Keep moving until at least one of the bump switches is against the trash can
-    for (int i = 0; bump_switch1.Value() == 1 && bump_switch2.Value() == 1; i++){
-        move_forward(testSpeed, i, 5.0);
-    }
+    right_motor.SetPercent(testSpeed);
+    left_motor.SetPercent(-testSpeed);
+
+    //Correct position against wall
+    while (bump_switch1.Value() == 1 && bump_switch2.Value() == 1);
+
+    right_motor.Stop();
+    left_motor.Stop();
 
     //move bucket arm down
     move_bucket_arm(armSpeed, 0.9);
@@ -524,7 +541,6 @@ int main(void)
     check_heading(first_turn_heading);
 
     //move away from tray
-    //move_backward(slowSpeed + 5, 5, 3.0);
     check_x(jukebox_light_x + 0.5, PLUS);
     Sleep(0.25);
     turn_right(testSpeed, ninetyDegreeCount);
@@ -557,10 +573,12 @@ int main(void)
             right_motor.Stop();
             LCD.WriteLine("Light Detected");
             LCD.WriteLine(cds.Value());
-            Sleep(1.0);
+            Sleep(0.25);
 
             if (cds.Value() >= 0.3 && cds.Value() <= 0.7){
                 LCD.WriteLine("RED");
+
+                move_prong_arm(-armSpeed, 0.5);
 
                 move_backward(slowSpeed, 5, 5.0);
 
@@ -573,14 +591,19 @@ int main(void)
                     right_motor.Stop();
                     left_motor.Stop();
 
-                    Sleep(1.0);
+                    Sleep(0.25);
 
                     keepMoving = false;
                     }
                 }
                 move_backward(20, 10.0, 1.5);
                 move_forward(testSpeed, 8.0, 1.5);
+
+                move_prong_arm(armSpeed, 0.5);
+
                 turn_left(testSpeed, ninetyDegreeCount);
+
+                Sleep(0.25);
 
                 //check heading before moving towards ramp
                 check_heading(turn_ramp_1_heading);
@@ -594,6 +617,8 @@ int main(void)
             else {
                 LCD.WriteLine("BLUE");
 
+                move_prong_arm(armSpeed, 0.5);
+
                 move_backward(slowSpeed, 5, 5.0);
 
                 right_motor.SetPercent(20);
@@ -605,7 +630,7 @@ int main(void)
                     right_motor.Stop();
                     left_motor.Stop();
 
-                    Sleep(1.0);
+                    Sleep(0.25);
 
                     keepMoving = false;
                     }
@@ -613,13 +638,18 @@ int main(void)
                 
                 move_backward(20, 10.0, 1.5);
                 move_forward(testSpeed, 5.0, 1.5);
+
+                move_prong_arm(-armSpeed, 0.5);
+
                 turn_left(testSpeed, ninetyDegreeCount - 10);
+
+                Sleep(0.25);
 
                 //check heading before moving towards ramp
                 check_heading(turn_ramp_1_heading);
 
                 //move towards ramp
-                move_backward(testSpeed, 70, 5.0);
+                move_backward(testSpeed, 100, 5.0);
 
                 //check x value before turning
                 check_x(turn_ramp_1_x, PLUS);
@@ -630,7 +660,6 @@ int main(void)
         Sleep(1.0);
     }
 
-
     //turn to ramp
     turn_left(testSpeed, ninetyDegreeCount);
 
@@ -639,24 +668,32 @@ int main(void)
     check_heading(turn_ramp_2_heading);
 
     // move up ramp
-    move_backward(65, 600, 10.0);
+    right_motor.SetPercent(-3 * testSpeed);
+    left_motor.SetPercent(3 * testSpeed);
+
+    while (RPS.Y() < 48.0);
+
+    right_motor.Stop();
+    left_motor.Stop();
 
     //Move to burger flip
-    turn_left(testSpeed, ninetyDegreeCount);
-    Sleep(0.25);
-    check_heading(burger_flip_1_heading);
+    turn_left(testSpeed, ninetyDegreeCount + 30);
+    
+    right_motor.SetPercent(testSpeed);
+    left_motor.SetPercent(-testSpeed);
 
     //Correct position against wall
-    for (int i = 0; bump_switch1.Value() == 1 || bump_switch2.Value() == 1; i++){
-        move_forward(testSpeed, i, 5.0);
-    }
+    while (bump_switch1.Value() == 1 || bump_switch2.Value() == 1);
+
+    right_motor.Stop();
+    left_motor.Stop();
 
     // move in front of burger flip
     move_backward(20, 20.0, 5.0);
     Sleep(0.25);
 
     // check x before turning
-    check_x(burger_flip_x, PLUS);
+    check_x(burger_flip_x, MINUS);
 
     //turn to burger flip
     turn_right(testSpeed, ninetyDegreeCount + 1);
@@ -668,31 +705,282 @@ int main(void)
     right_motor.SetPercent(-testSpeed);
     left_motor.SetPercent(testSpeed);
 
-    keepMoving = true;
-    while ((middle_opt.Value() < 1.0) && keepMoving){
+    bool moveBurgerLine = true;
+    while ((left_opt.Value() < 2.0 || middle_opt.Value() < 0.8) && moveBurgerLine){
         
 
-        if (middle_opt.Value() >= 1.0) {
+        if (left_opt.Value() >= 2.0 || middle_opt.Value() >= 0.8) {
             right_motor.Stop();
             left_motor.Stop();
 
             Sleep(1.0);
 
-            move_forward(slowSpeed, 6, 5.0);
-            keepMoving = false;
+            moveBurgerLine = false;
         }
     }
 
     //check heading
     check_heading(burger_flip_2_heading);
 
-    // move closer to ramp then check with rps
+    // move closer to wheel then check with rps
     move_backward(20, 4.0, 1.0);
     Sleep(0.25);
+
+    //check heading
+    check_heading(burger_flip_2_heading - 0.3);
+
+    Sleep(0.25);
+
+    pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
+
+    Sleep(0.25);
+    //check heading
+    check_heading(burger_flip_2_heading - 0.3);
 
     check_y(burger_flip_y, PLUS);
 
     //Flip burger
     move_prong_arm(5 * armSpeed, 0.5);
     move_prong_arm(-5 * armSpeed, 0.5);
+
+    //Back out of burger wheel
+    move_forward(testSpeed, 150, 5.0);
+
+    //Turn 180 degrees to face the ticket
+    turn_left(testSpeed, 2 * ninetyDegreeCount);
+
+    Sleep(0.25);
+
+    check_heading(sliding_ticket_heading);
+
+    //Stick sliding arm out
+    move_sliding_arm(90.0, 180.0);
+
+    right_motor.SetPercent(-testSpeed);
+    left_motor.SetPercent(testSpeed);
+
+    float slidingArmTime = TimeNow();
+    //move until bump switch is pressed
+    while ((bump_switch3.Value() == 1) && (TimeNow() - slidingArmTime < 3.0));
+
+    right_motor.Stop();
+    left_motor.Stop();
+
+    Sleep(0.25);
+
+    //angle arm into ticket crevice
+    check_heading(107.0);
+
+    //move more into crevice
+    move_backward(slowSpeed, 12, 5.0);
+
+    //move the ticket
+    turn_right(testSpeed, 70);
+
+    //try to enter the robot
+    turn_left(testSpeed, 50);
+
+    //back out of ticket
+    move_forward(testSpeed, 100, 5.0);
+
+    //retract arm back up
+    move_sliding_arm(180.0, 90.0);
+
+    //face the wall
+    turn_right(testSpeed, ninetyDegreeCount);
+
+    right_motor.SetPercent(testSpeed);
+    left_motor.SetPercent(-testSpeed);
+
+    //Correct position against wall
+    while (bump_switch1.Value() == 1 || bump_switch2.Value() == 1);
+
+    right_motor.Stop();
+    left_motor.Stop();
+
+    //get closer to ice cream levers
+    right_motor.SetPercent(-testSpeed);
+    left_motor.SetPercent(testSpeed);
+
+    while (RPS.X() > before_icecream_x);
+
+    right_motor.Stop();
+    left_motor.Stop();
+
+    check_x(before_icecream_x, PLUS);
+
+    //face ice cream levers
+    turn_right(testSpeed, ninetyDegreeCount);
+
+    check_heading(before_icecream_heading);
+
+    //move closer to the levers
+    move_backward(testSpeed, 10, 5.0);
+    
+    // Check which ice cream lever to flip
+    if(RPS.GetIceCream() == 0)
+    {
+        // Flip vanilla lever
+        check_y(vanilla_y, PLUS);
+
+        Sleep(1.0);
+
+        //move toward ice cream
+        turn_right(testSpeed, ninetyDegreeCount + 69);
+
+        Sleep(1.0);
+
+        //Check position in front of vanilla lever
+        check_heading(icecream_heading);
+
+        Sleep(1.0);
+
+        //Keep running until it detects the black line
+
+        right_motor.SetPercent(testSpeed);
+        left_motor.SetPercent(-testSpeed);
+
+        bool keepMoving = true;
+        while ((left_opt.Value() < 1.5 || middle_opt.Value() < 1.0) && keepMoving){
+            right_motor.SetPercent(testSpeed);
+            left_motor.SetPercent(-testSpeed);
+
+            if (left_opt.Value() >= 1.5 || middle_opt.Value() >= 1.0) {
+                right_motor.Stop();
+                left_motor.Stop();
+
+                Sleep(1.0);
+
+                move_forward(slowSpeed, 6, 5.0);
+                keepMoving = false;
+            }
+        }
+    } 
+    else if(RPS.GetIceCream() == 1)
+    {
+        // Flip twist lever
+        check_y(twist_y, PLUS);
+
+        Sleep(1.0);
+
+        move_backward(slowSpeed, 2, 5.0);
+
+        //move toward ice cream
+        turn_right(testSpeed, ninetyDegreeCount + 69);
+
+        Sleep(1.0);
+
+        //Check position in front of vanilla lever
+        check_heading(icecream_heading);
+
+        Sleep(1.0);
+
+        //Keep running until it detects the black line
+
+        right_motor.SetPercent(testSpeed);
+        left_motor.SetPercent(-testSpeed);
+
+        bool keepMoving = true;
+        while ((left_opt.Value() < 1.5 || middle_opt.Value() < 1.0) && keepMoving){
+        
+
+            if (left_opt.Value() >= 1.5 || middle_opt.Value() >= 1.0) {
+                right_motor.Stop();
+                left_motor.Stop();
+
+                Sleep(1.0);
+
+                move_forward(slowSpeed, 6, 5.0);
+                keepMoving = false;
+            }
+        }
+
+    }
+    else if(RPS.GetIceCream() == 2)
+    {
+
+       // Flip twist lever
+        check_y(chocolate_y, PLUS);
+
+        Sleep(1.0);
+
+        move_backward(slowSpeed, 3, 5.0);
+
+        //move toward ice cream
+        turn_right(testSpeed, ninetyDegreeCount + 80);
+
+        Sleep(1.0);
+
+        //Check position in front of vanilla lever
+        check_heading(119.0);
+
+        Sleep(1.0);
+
+        //Keep running until it detects the black line
+        right_motor.SetPercent(testSpeed);
+        left_motor.SetPercent(-testSpeed);
+
+        bool keepMoving = true;
+        while ((left_opt.Value() < 1.5 || middle_opt.Value() < 1.0) && keepMoving){
+        
+
+            if (left_opt.Value() >= 1.5 || middle_opt.Value() >= 1.0) {
+                right_motor.Stop();
+                left_motor.Stop();
+
+                Sleep(1.0);
+
+                move_forward(slowSpeed, 6, 5.0);
+                keepMoving = false;
+            }
+        }
+
+    }
+
+    Sleep(1.0);
+
+    //Flip the lever
+    move_bucket_arm(3 * armSpeed, 1.5); //move arm down
+    Sleep(1.0);
+    move_backward(slowSpeed, 10, 5.0); //move back from lever
+    Sleep(1.0);
+    move_bucket_arm(armSpeed, 0.5); //move arm down
+    Sleep(1.0);
+    move_forward(slowSpeed, 12, 5.0); //move back into lever
+    Sleep(5.0);
+    move_bucket_arm(-4 * armSpeed, 1.0); //move arm back up
+    Sleep(1.0);
+    move_bucket_arm(armSpeed, 1.5); //move arm back down little
+    Sleep(1.0);
+
+    //back up from lever
+    move_backward(testSpeed, 205, 5.0); //move back from lever
+    Sleep(1.0);
+    check_x(goingDown_x, PLUS); //check if robot is aligned with ramp
+    Sleep(1.0);
+
+    //Move down ramp
+    turn_right(testSpeed, 90); //turn to face the ramp
+    Sleep(1.0);
+    check_heading(goingDown_heading); //check the angle of the robot
+    Sleep(1.0);
+    move_backward(testSpeed, 750, 10.0); //go down the ramp
+    Sleep(1.0);
+    check_y(dowmRamp_y, MINUS); //check the y coordinate after going down the ramp
+    Sleep(1.0);
+
+    //Final button
+    turn_left(testSpeed, 100); //face the final button
+    Sleep(1.0);
+    check_heading(finalButton_heading); //Check if the robot is aligned with the button
+    Sleep(1.0);
+    move_backward(2 * testSpeed, 500, 5.0); //Ram that shit into the button
+
+    //Unreachable code
+    Sleep(2.0);
+
+    //Celebrate that the code ran all the way through
+    celebrate();
+
+    LCD.WriteLine("Hell yeah");    
 }
