@@ -35,6 +35,35 @@
 #define PLUS 0
 #define MINUS 1
 
+//Define RPS values
+#define vanilla_y 49.0
+#define twist_y 54.5
+#define chocolate_y 53.5
+#define goingDown_x 20.3
+#define goingDown_heading 88.7
+#define icecream_heading 135.3
+#define downRamp_y 16.0
+#define finalButton_heading 137.0
+#define first_turn_x 18.7
+#define first_turn_y 18.5
+#define first_turn_heading 180.0
+#define tray_turn_x 10.0
+#define jukebox_light_x 12.0
+#define tray_turn_heading 93.0
+#define before_color_heading 92.6
+#define jukebox_light_y 14.0
+#define after_color_y 17.9
+#define turn_ramp_1_heading 181.9
+#define turn_ramp_1_x 22.0
+#define turn_ramp_2_heading 270.0
+#define burger_flip_1_heading 5.0
+#define burger_flip_x 24.9
+#define burger_flip_y 63.5
+#define burger_flip_2_heading 273.0
+#define sliding_ticket_heading  92.1
+#define before_icecream_x 17.0
+#define before_icecream_heading 273.0
+
 DigitalEncoder right_encoder(FEHIO::P3_0);
 DigitalEncoder left_encoder(FEHIO::P1_0);
 FEHMotor right_motor(FEHMotor::Motor1,9.0);
@@ -459,33 +488,6 @@ int main(void)
 {
     //intitalize RPS values
     float touch_x,touch_y;
-    float vanilla_y = 51.0;
-    float twist_y = 55.0;
-    float chocolate_y = 55.0;
-    float goingDown_x = 20.3;
-    float goingDown_heading = 88.7;
-    float icecream_heading = 135.3;
-    float downRamp_y = 16.0;
-    float finalButton_heading = 137.0;
-    float first_turn_x = 18.7;
-    float first_turn_y = 18.5;
-    float first_turn_heading = 180.0;
-    float tray_turn_x = 10.0;
-    float jukebox_light_x = 12.0;
-    float tray_turn_heading = 93.0;
-    float before_color_heading = 92.6;
-    float jukebox_light_y = 14.0;
-    float after_color_y = 17.9;
-    float turn_ramp_1_heading = 181.9;
-    float turn_ramp_1_x = 22.0;
-    float turn_ramp_2_heading = 270.0;
-    float burger_flip_1_heading = 5.0;
-    float burger_flip_x = 24.9;
-    float burger_flip_y = 63.75;
-    float burger_flip_2_heading = 273.0;
-    float sliding_ticket_heading = 92.1;
-    float before_icecream_x = 17.0;
-    float before_icecream_heading = 273.0;
 
     //Tell the robot which course it's on
     RPS.InitializeTouchMenu();
@@ -713,10 +715,10 @@ int main(void)
     check_heading(turn_ramp_2_heading);
 
     // move up ramp
-    right_motor.SetPercent(-3 * testSpeed);
+    right_motor.SetPercent((-3 * testSpeed) + 2);
     left_motor.SetPercent(3 * testSpeed);
 
-    while (RPS.Y() < 48.0);
+    while (RPS.Y() < 45.0);
 
     right_motor.Stop();
     left_motor.Stop();
@@ -730,6 +732,12 @@ int main(void)
 
     //Move to burger flip
     turn_left(testSpeed, ninetyDegreeCount + 30);
+
+    move_forward(35, 30, 2.0);
+
+    Sleep(0.25);
+
+    check_heading(burger_flip_1_heading);
     
     right_motor.SetPercent(testSpeed + 10);
     left_motor.SetPercent(-testSpeed - 10);
@@ -778,10 +786,40 @@ int main(void)
     move_backward(20, 4.0, 1.0);
     Sleep(0.25);
     
-    while (RPS.Y() < burger_flip_y){
-        check_heading_two(burger_flip_2_heading);
-        pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
-    }
+    //while (RPS.Y() < burger_flip_y){
+    //    check_heading(burger_flip_2_heading);
+    //    pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
+    //}
+    
+    check_heading_two(burger_flip_2_heading);
+
+    Sleep(0.25);
+
+    pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
+
+    Sleep(0.25);
+    
+    check_heading_two(burger_flip_2_heading);
+
+    Sleep(0.25);
+
+    pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
+
+    Sleep(0.25);
+    
+    check_heading_two(burger_flip_2_heading);
+
+    Sleep(0.25);
+
+    pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
+
+    Sleep(0.25);
+    
+    check_heading_two(burger_flip_2_heading);
+
+    Sleep(0.25);
+
+    pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
 
     Sleep(0.25);
 
@@ -796,7 +834,6 @@ int main(void)
 
     START SLIDING TICKET
     */
-
 
     //Back out of burger wheel
     move_forward(testSpeed, 150, 5.0);
@@ -839,7 +876,7 @@ int main(void)
     turn_left(testSpeed, 50);
 
     //back out of ticket
-    move_forward(testSpeed, 100, 5.0);
+    move_forward(testSpeed, 90, 5.0);
 
     //retract arm back up
     move_sliding_arm(180.0, 90.0);
@@ -894,13 +931,10 @@ int main(void)
 
         //Keep running until it detects the black line
 
-        right_motor.SetPercent(testSpeed + 10);
-        left_motor.SetPercent(-testSpeed - 10);
-
         bool keepMoving = true;
         while ((left_opt.Value() < 1.5 || middle_opt.Value() < 1.0) && keepMoving){
-            right_motor.SetPercent(testSpeed);
-            left_motor.SetPercent(-testSpeed);
+            right_motor.SetPercent(testSpeed + 10);
+            left_motor.SetPercent(-testSpeed - 10);
 
             if (left_opt.Value() >= 1.5 || middle_opt.Value() >= 1.0) {
                 right_motor.Stop();
@@ -912,8 +946,27 @@ int main(void)
         }
 
         Sleep(0.25);
-        //Check position in front of vanilla lever
-        check_heading(icecream_heading);
+
+        //Flip the lever
+        move_bucket_arm(3 * armSpeed, 1.5); //move arm down
+        move_backward(slowSpeed, 10, 5.0); //move back from lever
+        Sleep(1.0);
+        move_bucket_arm(armSpeed, 0.5); //move arm down
+        Sleep(1.0);
+        move_forward(slowSpeed, 12, 5.0); //move back into lever
+        Sleep(2.0);
+        move_bucket_arm(-4 * armSpeed, 1.0); //move arm back up
+        move_bucket_arm(armSpeed, 1.5); //move arm back down little
+
+        //back up from lever
+        move_backward(testSpeed, 205, 5.0); //move back from lever
+        Sleep(0.25);
+        if (RPS.X() < goingDown_x){
+            check_x(goingDown_x, PLUS); //check if robot is aligned with ramp
+        }
+        else {
+            check_x(goingDown_x, MINUS); //check if robot is aligned with ramp
+        }
     } 
     else if(RPS.GetIceCream() == 1)
     {
@@ -921,8 +974,8 @@ int main(void)
         //move_backward(testSpeed, 5, 0.5);
 
         // Flip twist lever
-        right_motor.SetPercent(testSpeed);
-        left_motor.SetPercent(-testSpeed);
+        right_motor.SetPercent(-testSpeed);
+        left_motor.SetPercent(testSpeed);
 
         while (RPS.Y() < (twist_y));
 
@@ -936,8 +989,6 @@ int main(void)
         else{
             check_y(twist_y, MINUS); //check the y coordinate after going down the ramp
         }
-
-        move_backward(slowSpeed, 2, 5.0);
 
         //move toward ice cream
         turn_right(testSpeed, ninetyDegreeCount + 80);
@@ -967,9 +1018,26 @@ int main(void)
 
         Sleep(0.25);
 
-        //Check position in front of vanilla lever
-        check_heading(icecream_heading);
+        //Flip the lever
+        move_bucket_arm(3 * armSpeed, 1.5); //move arm down
+        move_backward(slowSpeed, 10, 5.0); //move back from lever
+        Sleep(1.0);
+        move_bucket_arm(armSpeed, 0.5); //move arm down
+        Sleep(1.0);
+        move_forward(slowSpeed, 12, 5.0); //move back into lever
+        Sleep(2.0);
+        move_bucket_arm(-4 * armSpeed, 1.0); //move arm back up
+        move_bucket_arm(armSpeed, 1.5); //move arm back down little
 
+        //back up from lever
+        move_backward(testSpeed, 180, 5.0); //move back from lever
+        Sleep(0.25);
+        if (RPS.X() < goingDown_x){
+            check_x(goingDown_x, PLUS); //check if robot is aligned with ramp
+        }
+        else {
+            check_x(goingDown_x, MINUS); //check if robot is aligned with ramp
+        }
     }
     else if(RPS.GetIceCream() == 2)
     {
@@ -977,10 +1045,22 @@ int main(void)
         //move closer to the levers
         //move_backward(testSpeed, 5, 0.5);
 
-       // Flip twist lever
-        check_y(chocolate_y, PLUS);
+        // Flip twist lever
+        right_motor.SetPercent(-testSpeed);
+        left_motor.SetPercent(testSpeed);
 
-        move_backward(slowSpeed, 2, 5.0);
+        while (RPS.Y() < (chocolate_y));
+
+        right_motor.Stop();
+        left_motor.Stop();
+
+        Sleep(0.25);
+        if (RPS.Y() > chocolate_y) {
+            check_y(chocolate_y, PLUS); //check the y coordinate after going down the ramp
+        }
+        else{
+            check_y(chocolate_y, MINUS); //check the y coordinate after going down the ramp
+        }
 
         //move toward ice cream
         turn_right(testSpeed, ninetyDegreeCount + 100);
@@ -1008,34 +1088,27 @@ int main(void)
         }
         Sleep(0.25);
 
-        //Check position in front of chocolate lever
-        check_heading(119.0);
+        //Flip the lever
+        move_bucket_arm(3 * armSpeed, 1.5); //move arm down
+        move_backward(slowSpeed, 10, 5.0); //move back from lever
+        Sleep(1.0);
+        move_bucket_arm(armSpeed, 0.5); //move arm down
+        Sleep(1.0);
+        move_forward(slowSpeed, 12, 5.0); //move back into lever
+        Sleep(2.0);
+        move_bucket_arm(-4 * armSpeed, 1.0); //move arm back up
+        move_bucket_arm(armSpeed, 1.5); //move arm back down little
 
+        //back up from lever
+        move_backward(testSpeed, 205, 5.0); //move back from lever
+        Sleep(0.25);
+        if (RPS.X() < goingDown_x){
+            check_x(goingDown_x, PLUS); //check if robot is aligned with ramp
+        }
+        else {
+            check_x(goingDown_x, MINUS); //check if robot is aligned with ramp
+        }
     }
-
-    Sleep(1.0);
-
-    //Flip the lever
-    move_bucket_arm(3 * armSpeed, 1.5); //move arm down
-    move_backward(slowSpeed, 10, 5.0); //move back from lever
-    Sleep(1.0);
-    move_bucket_arm(armSpeed, 0.5); //move arm down
-    Sleep(1.0);
-    move_forward(slowSpeed, 12, 5.0); //move back into lever
-    Sleep(2.0);
-    move_bucket_arm(-4 * armSpeed, 1.0); //move arm back up
-    move_bucket_arm(armSpeed, 1.5); //move arm back down little
-
-    //back up from lever
-    move_backward(testSpeed, 205, 5.0); //move back from lever
-    Sleep(0.25);
-    if (RPS.X() < goingDown_x){
-        check_x(goingDown_x, PLUS); //check if robot is aligned with ramp
-    }
-    else{
-        check_x(goingDown_x, MINUS); //check if robot is aligned with ramp
-    }
-    
 
 
     /*
