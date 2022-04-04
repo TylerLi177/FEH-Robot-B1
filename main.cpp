@@ -18,7 +18,7 @@
 #define SERVO_MAX 2410
 
 // RPS Delay time
-#define RPS_WAIT_TIME_IN_SEC 0.35
+#define RPS_WAIT_TIME_IN_SEC 0.2
 
 // Shaft encoding counts for CrayolaBots
 #define COUNTS_PER_INCH 40.5
@@ -35,33 +35,33 @@
 #define PLUS 0
 #define MINUS 1
 
-//Define RPS values
-#define vanilla_y 49.0
-#define twist_y 54.5
-#define chocolate_y 53.5
-#define goingDown_x 20.3
+//Define RPS differences because some of the courses are inconsistent for some reason, idk don't blame me
+#define vanilla_y 39.7
+#define twist_y 44.2
+#define chocolate_y 43.2
+#define goingDown_x -6
 #define goingDown_heading 88.7
 #define icecream_heading 135.3
-#define downRamp_y 16.0
+#define downRamp_y 5.7
 #define finalButton_heading 137.0
-#define first_turn_x 18.7
-#define first_turn_y 18.5
+#define first_turn_x -7.6
+#define first_turn_y 8.2
 #define first_turn_heading 180.0
-#define tray_turn_x 10.0
-#define jukebox_light_x 12.0
+#define tray_turn_x -16.3
+#define jukebox_light_x -14.3
 #define tray_turn_heading 93.0
 #define before_color_heading 92.6
-#define jukebox_light_y 14.0
-#define after_color_y 17.9
+#define jukebox_light_y 3.7
+#define after_color_y 7.6
 #define turn_ramp_1_heading 181.9
-#define turn_ramp_1_x 22.0
+#define turn_ramp_1_x -4.3
 #define turn_ramp_2_heading 270.0
 #define burger_flip_1_heading 5.0
-#define burger_flip_x 24.9
-#define burger_flip_y 63.5
+#define burger_flip_x -1.5
+#define burger_flip_y 53.2
 #define burger_flip_2_heading 273.0
 #define sliding_ticket_heading  92.1
-#define before_icecream_x 17.0
+#define before_icecream_x -9.3
 #define before_icecream_heading 273.0
 
 DigitalEncoder right_encoder(FEHIO::P3_0);
@@ -517,10 +517,13 @@ int main(void)
     while(LCD.Touch(&touch_x,&touch_y));
 
     // get the voltage level and display it to the screen
-        LCD.WriteLine("Battery Voltage: ");
-        LCD.WriteLine(Battery.Voltage());
-        LCD.WriteLine("\n");
-        Sleep(0.5);
+    LCD.WriteLine("Battery Voltage: ");
+    LCD.WriteLine(Battery.Voltage());
+    LCD.WriteLine("\n");
+    Sleep(0.5);
+    
+    float rps_start_x = RPS.X();
+    float rps_start_y = RPS.Y();
 
     //Check if the starting light is not red
     check_starting_light(0.25, 0.7);
@@ -536,7 +539,7 @@ int main(void)
     move_forward(2 * testSpeed, 200, 5.0); //move forward from starting light
     Sleep(0.25);
     
-    check_y(first_turn_y, MINUS);
+    check_y(first_turn_y + rps_start_y, MINUS);
 
     //turn to go to trash can
     turn_left(testSpeed, 100);
@@ -556,7 +559,7 @@ int main(void)
     move_backward(slowSpeed + 5, 10, 5.0);
 
     //pulse back to line up with the trash can
-    check_x(tray_turn_x, PLUS);
+    check_x(tray_turn_x + rps_start_x, PLUS);
 
     //turn to trash can
     turn_right(testSpeed, ninetyDegreeCount);
@@ -595,7 +598,7 @@ int main(void)
     Sleep(0.25);
 
     //move away from tray
-    check_x(jukebox_light_x + 0.5, PLUS);
+    check_x(jukebox_light_x + 0.5 + rps_start_x, PLUS);
     Sleep(0.25);
     turn_right(testSpeed, ninetyDegreeCount);
     check_heading(before_color_heading);
@@ -617,7 +620,7 @@ int main(void)
         }
     }
 
-    check_y(jukebox_light_y, MINUS);
+    check_y(jukebox_light_y + rps_start_y, MINUS);
 
     check_heading(before_color_heading);
 
@@ -674,7 +677,7 @@ int main(void)
                 move_backward(testSpeed, 70, 5.0);
 
                 //check x value before turning
-                check_x(turn_ramp_1_x, PLUS);
+                check_x(turn_ramp_1_x + rps_start_x, PLUS);
             }
 
             //Check if the light was blue
@@ -701,7 +704,7 @@ int main(void)
                     }
                 }
                 
-                //Move closer to the button
+                //Press the button
                 move_backward(20, 10.0, 1.5);
 
                 //Back away from button
@@ -724,7 +727,7 @@ int main(void)
                 Sleep(0.25);
 
                 //check x value before turning
-                check_x(turn_ramp_1_x, PLUS);
+                check_x(turn_ramp_1_x + rps_start_x, PLUS);
             }
     }
     else {
@@ -747,7 +750,7 @@ int main(void)
     check_heading(turn_ramp_2_heading);
 
     // move up ramp
-    right_motor.SetPercent((-3 * testSpeed) + 2);
+    right_motor.SetPercent(-3 * testSpeed);
     left_motor.SetPercent(3 * testSpeed);
 
     while (RPS.Y() < 45.0);
@@ -766,9 +769,9 @@ int main(void)
 
     move_forward(35, 30, 2.0);
 
-    Sleep(0.25);
+    // Sleep(0.25);
 
-    check_heading(burger_flip_1_heading);
+    //check_heading(burger_flip_1_heading);
     
     right_motor.SetPercent(testSpeed + 10);
     left_motor.SetPercent(-testSpeed - 10);
@@ -784,7 +787,7 @@ int main(void)
     Sleep(0.25);
 
     // check x before turning
-    check_x(burger_flip_x, MINUS);
+    check_x(burger_flip_x + rps_start_x, MINUS);
 
     //turn to burger flip
     turn_right(testSpeed, ninetyDegreeCount + 1);
@@ -873,7 +876,7 @@ int main(void)
 
     float insertSlidingArmTime = TimeNow();
     //angle arm into ticket crevice
-    while ((RPS.Y() < 107) && (TimeNow() - insertSlidingArmTime < 2.0)){
+    while ((RPS.Heading() < 107) && (TimeNow() - insertSlidingArmTime < 2.0)){
         check_heading(107.0);
     }
 
@@ -913,12 +916,12 @@ int main(void)
     right_motor.SetPercent(-testSpeed);
     left_motor.SetPercent(testSpeed);
 
-    while (RPS.X() > before_icecream_x + 1);
+    while (RPS.X() > before_icecream_x + 1 + rps_start_x);
 
     right_motor.Stop();
     left_motor.Stop();
 
-    check_x(before_icecream_x, PLUS);
+    check_x(before_icecream_x + rps_start_x, PLUS);
 
     //face ice cream levers
     turn_right(testSpeed, ninetyDegreeCount);
@@ -929,7 +932,7 @@ int main(void)
     if(RPS.GetIceCream() == 0)
     {
         // Flip vanilla lever
-        check_y(vanilla_y, PLUS);
+        check_y(vanilla_y + rps_start_y, PLUS);
 
         //move toward ice cream
         turn_right(testSpeed, ninetyDegreeCount + 90);
@@ -971,11 +974,11 @@ int main(void)
         //back up from lever
         move_backward(testSpeed, 205, 5.0); //move back from lever
         Sleep(0.25);
-        if (RPS.X() < goingDown_x){
-            check_x(goingDown_x, PLUS); //check if robot is aligned with ramp
+        if (RPS.X() < goingDown_x + rps_start_x){
+            check_x(goingDown_x + rps_start_x, PLUS); //check if robot is aligned with ramp
         }
         else {
-            check_x(goingDown_x, MINUS); //check if robot is aligned with ramp
+            check_x(goingDown_x + rps_start_x, MINUS); //check if robot is aligned with ramp
         }
     } 
     else if(RPS.GetIceCream() == 1)
@@ -993,11 +996,11 @@ int main(void)
         left_motor.Stop();
 
         Sleep(0.25);
-        if (RPS.Y() > twist_y) {
-            check_y(twist_y, PLUS); //check the y coordinate after going down the ramp
+        if (RPS.Y() > twist_y + rps_start_y) {
+            check_y(twist_y + rps_start_y, PLUS); //check the y coordinate after going down the ramp
         }
         else{
-            check_y(twist_y, MINUS); //check the y coordinate after going down the ramp
+            check_y(twist_y + rps_start_y, MINUS); //check the y coordinate after going down the ramp
         }
 
         //move toward ice cream
@@ -1042,11 +1045,11 @@ int main(void)
         //back up from lever
         move_backward(testSpeed, 180, 5.0); //move back from lever
         Sleep(0.25);
-        if (RPS.X() < goingDown_x){
-            check_x(goingDown_x, PLUS); //check if robot is aligned with ramp
+        if (RPS.X() < goingDown_x + rps_start_x){
+            check_x(goingDown_x + rps_start_x, PLUS); //check if robot is aligned with ramp
         }
         else {
-            check_x(goingDown_x, MINUS); //check if robot is aligned with ramp
+            check_x(goingDown_x + rps_start_x, MINUS); //check if robot is aligned with ramp
         }
     }
     else if(RPS.GetIceCream() == 2)
@@ -1059,17 +1062,17 @@ int main(void)
         right_motor.SetPercent(-testSpeed);
         left_motor.SetPercent(testSpeed);
 
-        while (RPS.Y() < (chocolate_y));
+        while (RPS.Y() < (chocolate_y + rps_start_y));
 
         right_motor.Stop();
         left_motor.Stop();
 
         Sleep(0.25);
-        if (RPS.Y() > chocolate_y) {
-            check_y(chocolate_y, PLUS); //check the y coordinate after going down the ramp
+        if (RPS.Y() > chocolate_y + rps_start_y) {
+            check_y(chocolate_y + rps_start_y, PLUS); //check the y coordinate after going down the ramp
         }
         else{
-            check_y(chocolate_y, MINUS); //check the y coordinate after going down the ramp
+            check_y(chocolate_y + rps_start_y, MINUS); //check the y coordinate after going down the ramp
         }
 
         //move toward ice cream
@@ -1112,11 +1115,11 @@ int main(void)
         //back up from lever
         move_backward(testSpeed, 205, 5.0); //move back from lever
         Sleep(0.25);
-        if (RPS.X() < goingDown_x){
-            check_x(goingDown_x, PLUS); //check if robot is aligned with ramp
+        if (RPS.X() < goingDown_x + rps_start_x){
+            check_x(goingDown_x + rps_start_x, PLUS); //check if robot is aligned with ramp
         }
         else {
-            check_x(goingDown_x, MINUS); //check if robot is aligned with ramp
+            check_x(goingDown_x + rps_start_x, MINUS); //check if robot is aligned with ramp
         }
     }
 
@@ -1136,17 +1139,17 @@ int main(void)
     right_motor.SetPercent(-2 * testSpeed);
     left_motor.SetPercent(2 * testSpeed);
 
-    while (RPS.Y() > (downRamp_y + 3.0));
+    while (RPS.Y() > (downRamp_y + 3.0 + rps_start_y));
 
     right_motor.Stop();
     left_motor.Stop();   
 
     Sleep(0.25);
-    if (RPS.Y() < downRamp_y) {
-        check_y(downRamp_y, MINUS); //check the y coordinate after going down the ramp
+    if (RPS.Y() < downRamp_y + rps_start_y) {
+        check_y(downRamp_y + rps_start_y, MINUS); //check the y coordinate after going down the ramp
     }
     else{
-        check_y(downRamp_y, PLUS); //check the y coordinate after going down the ramp
+        check_y(downRamp_y + rps_start_y, PLUS); //check the y coordinate after going down the ramp
     }
 
     //Final button
