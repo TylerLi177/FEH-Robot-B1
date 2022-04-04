@@ -80,18 +80,35 @@ DigitalInputPin bump_switch2(FEHIO::P3_2);
 DigitalInputPin bump_switch3(FEHIO::P3_4);
 
 void check_starting_light(float lowerbound, float upperbound){
-    while (cds.Value() <= lowerbound || cds.Value() >= upperbound) {
+
+    float startingLightTimeOut = TimeNow();
+    while ((cds.Value() <= lowerbound || cds.Value() >= upperbound) && (TimeNow() - startingLightTimeOut < 30.0)) {
+        //Write optosensor values to the screen
         LCD.Write(left_opt.Value());
         LCD.Write("\t");
         LCD.Write(middle_opt.Value());
         LCD.Write("\t");
         LCD.Write(right_opt.Value());
+        LCD.WriteLine("\n\n");
+
+        //Write RPS Values to screen
+        LCD.Write(RPS.X());
+        LCD.Write("\t");
+        LCD.Write(RPS.Y());
+        LCD.Write("\t");
+        LCD.Write(RPS.Heading());
+        LCD.WriteLine("\n\n");
+
+        //Keep the motors from running until a valid light is seen
+        left_motor.Stop();
+        right_motor.Stop();
+
+        //Write the cds value to the screen
+        LCD.WriteLine(cds.Value());
         LCD.WriteLine("\n");
-            left_motor.Stop();
-            right_motor.Stop();
-            LCD.WriteLine(cds.Value());
-            Sleep(1.0);
-        }
+
+        Sleep(1.0);
+    }
 }
 
 void move_backward(int percent, float counts, float timeFailSafe) //using encoders
@@ -493,6 +510,7 @@ int main(void)
     RPS.InitializeTouchMenu();
     Sleep(0.5);
 
+    //Final action
     LCD.WriteLine("RPS & Data Logging Test");
     LCD.WriteLine("Press Screen To Start");
     while(!LCD.Touch(&touch_x,&touch_y));
@@ -549,8 +567,8 @@ int main(void)
     right_motor.SetPercent(testSpeed);
     left_motor.SetPercent(-testSpeed);
 
-    //Correct position against wall
-    while (bump_switch1.Value() == 1 && bump_switch2.Value() == 1);
+    float dropBucket = TimeNow();
+    while ((bump_switch1.Value() == 1 && bump_switch2.Value() == 1) && (TimeNow() - dropBucket < 3.0));
 
     right_motor.Stop();
     left_motor.Stop();
@@ -569,7 +587,6 @@ int main(void)
 
     /*
     END TRAY DUMP
-
     START JUKEBOX LIGHT
     */
 
@@ -583,7 +600,7 @@ int main(void)
     turn_right(testSpeed, ninetyDegreeCount);
     check_heading(before_color_heading);
 
-
+    //Move to the jukebox
     right_motor.SetPercent(-testSpeed);
     left_motor.SetPercent(testSpeed);
 
@@ -612,32 +629,40 @@ int main(void)
             LCD.WriteLine(cds.Value());
             Sleep(0.25);
 
+            //Check if the light was red
             if (cds.Value() >= 0.3 && cds.Value() <= 0.7){
                 LCD.WriteLine("RED");
 
-                move_prong_arm(-armSpeed, 0.5);
+                move_prong_arm(-armSpeed, 0.5); //Angle the prong arm so it is able to press he button easier
 
-                move_backward(slowSpeed, 5, 5.0);
+                move_backward(slowSpeed, 5, 5.0); //Move closer to the button
 
                 right_motor.SetPercent(-20);
                 left_motor.SetPercent(-20);
+
+                //Slowly move forward until the black lines in front of the jukebox buttons are detected
                 keepMoving = true;
-
                 while ((middle_opt.Value() < 0.7) && keepMoving){
-                if (middle_opt.Value() >= 0.7) {
-                    right_motor.Stop();
-                    left_motor.Stop();
+                    if (middle_opt.Value() >= 0.7) {
+                        right_motor.Stop();
+                        left_motor.Stop();
 
-                    Sleep(0.25);
+                        Sleep(0.25);
 
-                    keepMoving = false;
+                        keepMoving = false;
                     }
                 }
+
+                //Press the button
                 move_backward(20, 10.0, 1.5);
+
+                //Back away from the button
                 move_forward(testSpeed, 8.0, 1.5);
 
+                //Angle the prong arm back to original positon
                 move_prong_arm(armSpeed, 0.5);
 
+                //Turn to the ramp
                 turn_left(testSpeed, ninetyDegreeCount);
 
                 Sleep(0.25);
@@ -651,17 +676,20 @@ int main(void)
                 //check x value before turning
                 check_x(turn_ramp_1_x, PLUS);
             }
+
+            //Check if the light was blue
             else {
                 LCD.WriteLine("BLUE");
 
-                move_prong_arm(armSpeed, 0.5);
+                move_prong_arm(armSpeed, 0.5); //Angle the prong arm so it is able to press he button easier
 
-                move_backward(slowSpeed, 5, 5.0);
+                move_backward(slowSpeed, 5, 5.0); //Move closer to the button
 
                 right_motor.SetPercent(20);
                 left_motor.SetPercent(20);
                 keepMoving = true;
 
+                //Slowly move forward until the black lines in front of the jukebox buttons are detected
                 while ((middle_opt.Value() < 0.7) && keepMoving){
                 if (middle_opt.Value() >= 0.7) {
                     right_motor.Stop();
@@ -673,11 +701,16 @@ int main(void)
                     }
                 }
                 
+                //Move closer to the button
                 move_backward(20, 10.0, 1.5);
+
+                //Back away from button
                 move_forward(testSpeed, 5.0, 1.5);
 
+                //Angle prong arm back to original position
                 move_prong_arm(-armSpeed, 0.5);
 
+                //Turn to ramp
                 turn_left(testSpeed, ninetyDegreeCount - 40);
 
                 Sleep(0.25);
@@ -702,7 +735,6 @@ int main(void)
 
     /*
     END JUKEBOX LIGHT
-
     START RAMP
     */
 
@@ -726,7 +758,6 @@ int main(void)
 
     /*
     END RAMP
-
     START BURGER FLIP
     */
 
@@ -765,6 +796,7 @@ int main(void)
     right_motor.SetPercent(-testSpeed);
     left_motor.SetPercent(testSpeed);
 
+    //Drive until the optosensors sees the line in front of the burger flip
     bool moveBurgerLine = true;
     while ((left_opt.Value() < 2.0 || middle_opt.Value() < 0.8) && moveBurgerLine){
         
@@ -786,43 +818,23 @@ int main(void)
     move_backward(20, 4.0, 1.0);
     Sleep(0.25);
     
-    //while (RPS.Y() < burger_flip_y){
-    //    check_heading(burger_flip_2_heading);
-    //    pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
-    //}
-    
+    //Continuously adjust the robot so that the prong arm fits into the wheel holes
     check_heading_two(burger_flip_2_heading);
-
     Sleep(0.25);
-
     pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
-
     Sleep(0.25);
-    
     check_heading_two(burger_flip_2_heading);
-
     Sleep(0.25);
-
     pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
-
     Sleep(0.25);
-    
     check_heading_two(burger_flip_2_heading);
-
     Sleep(0.25);
-
     pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
-
     Sleep(0.25);
-    
     check_heading_two(burger_flip_2_heading);
-
     Sleep(0.25);
-
     pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
-
     Sleep(0.25);
-
     pulse_forward(-PULSE_POWER, PULSE_TIME);
 
     //Flip burger
@@ -831,7 +843,6 @@ int main(void)
 
     /*
     END BURGER FLIP
-
     START SLIDING TICKET
     */
 
@@ -883,7 +894,6 @@ int main(void)
 
     /*
     END SLIDING TICKET
-
     START ICE CREAM LEVER
     */
 
@@ -1113,7 +1123,6 @@ int main(void)
 
     /*
     END ICE CREAM LEVER
-
     START FINAL BUTTON
     */
 
