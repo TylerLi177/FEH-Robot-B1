@@ -18,7 +18,7 @@
 #define SERVO_MAX 2410
 
 // RPS Delay time
-#define RPS_WAIT_TIME_IN_SEC 0.2
+#define RPS_WAIT_TIME_IN_SEC 0.25
 
 // Shaft encoding counts for CrayolaBots
 #define COUNTS_PER_INCH 40.5
@@ -38,11 +38,11 @@
 //Define RPS differences because some of the courses are inconsistent for some reason, idk don't blame me
 #define vanilla_y 39.7
 #define twist_y 44.2
-#define chocolate_y 43.2
+#define chocolate_y 43.0
 #define goingDown_x -6
 #define goingDown_heading 88.7
 #define icecream_heading 135.3
-#define downRamp_y 5.7
+#define downRamp_y 7.0
 #define finalButton_heading 137.0
 #define first_turn_x -7.6
 #define first_turn_y 8.2
@@ -54,10 +54,10 @@
 #define jukebox_light_y 3.7
 #define after_color_y 7.6
 #define turn_ramp_1_heading 181.9
-#define turn_ramp_1_x -4.3
+#define turn_ramp_1_x -4.6
 #define turn_ramp_2_heading 270.0
 #define burger_flip_1_heading 5.0
-#define burger_flip_x -1.5
+//#define burger_flip_x -1.4
 #define burger_flip_y 53.2
 #define burger_flip_2_heading 273.0
 #define sliding_ticket_heading  92.1
@@ -157,6 +157,38 @@ void move_forward(int percent, float counts, float timeFailSafe) //using encoder
     //Turn off motors
     right_motor.Stop();
     left_motor.Stop();
+}
+
+void turn_right_two(int percent, int counts, float timeFailSafe) //using encoders
+{
+
+LCD.WriteLine("Right");
+
+//Reset encoder counts
+
+right_encoder.ResetCounts();
+
+left_encoder.ResetCounts();
+
+//Set both motors to desired percent
+
+//hint: set right motor backwards, left motor forwards
+
+left_motor.SetPercent(-1 * percent);
+right_motor.SetPercent(-1 * percent);
+
+//While the average of the left and right encoder is less than counts,
+//keep running motors
+
+float time = TimeNow();
+while (((left_encoder.Counts() + right_encoder.Counts()) / 2) < counts && (TimeNow() - time < timeFailSafe));
+
+//Turn off motors
+
+right_motor.Stop();
+
+left_motor.Stop();
+
 }
 
 /*
@@ -505,10 +537,21 @@ int main(void)
 {
     //intitalize RPS values
     float touch_x,touch_y;
+    float burger_flip_x;
 
     //Tell the robot which course it's on
     RPS.InitializeTouchMenu();
-    Sleep(0.5);
+    Sleep(2.0);
+
+    //collect burger flip x
+    //Final action
+    LCD.WriteLine("Press Screen To Collect Burger Flip X");
+    while(!LCD.Touch(&touch_x,&touch_y));
+    while(LCD.Touch(&touch_x,&touch_y)){
+        burger_flip_x = RPS.X();
+    }
+
+    Sleep(3.0);
 
     //Final action
     LCD.WriteLine("RPS & Data Logging Test");
@@ -563,6 +606,8 @@ int main(void)
 
     //turn to trash can
     turn_right(testSpeed, ninetyDegreeCount);
+
+    Sleep(0.1);
 
     check_heading(tray_turn_heading);
 
@@ -638,7 +683,7 @@ int main(void)
 
                 move_prong_arm(-armSpeed, 0.5); //Angle the prong arm so it is able to press he button easier
 
-                move_backward(slowSpeed, 5, 5.0); //Move closer to the button
+                move_backward(slowSpeed, 3 5.0); //Move closer to the button
 
                 right_motor.SetPercent(-20);
                 left_motor.SetPercent(-20);
@@ -731,8 +776,52 @@ int main(void)
             }
     }
     else {
-        LCD.WriteLine("Aya, why you so failure");
-        Sleep(1.0);
+        LCD.WriteLine("BLUE");
+
+                move_prong_arm(armSpeed, 0.5); //Angle the prong arm so it is able to press he button easier
+
+                move_backward(slowSpeed, 5, 5.0); //Move closer to the button
+
+                right_motor.SetPercent(20);
+                left_motor.SetPercent(20);
+                keepMoving = true;
+
+                //Slowly move forward until the black lines in front of the jukebox buttons are detected
+                while ((middle_opt.Value() < 0.7) && keepMoving){
+                if (middle_opt.Value() >= 0.7) {
+                    right_motor.Stop();
+                    left_motor.Stop();
+
+                    Sleep(0.25);
+
+                    keepMoving = false;
+                    }
+                }
+                
+                //Press the button
+                move_backward(20, 10.0, 1.5);
+
+                //Back away from button
+                move_forward(testSpeed, 5.0, 1.5);
+
+                //Angle prong arm back to original position
+                move_prong_arm(-armSpeed, 0.5);
+
+                //Turn to ramp
+                turn_left(testSpeed, ninetyDegreeCount - 40);
+
+                Sleep(0.25);
+
+                //check heading before moving towards ramp
+                check_heading(turn_ramp_1_heading);
+
+                //move towards ramp
+                move_backward(testSpeed + 10, 160, 5.0);
+
+                Sleep(0.25);
+
+                //check x value before turning
+                check_x(turn_ramp_1_x + rps_start_x, PLUS);
     }
 
 
@@ -753,7 +842,7 @@ int main(void)
     right_motor.SetPercent(-3 * testSpeed);
     left_motor.SetPercent(3 * testSpeed);
 
-    while (RPS.Y() < 45.0);
+    while (RPS.Y() < 35.0 + rps_start_y);
 
     right_motor.Stop();
     left_motor.Stop();
@@ -787,7 +876,7 @@ int main(void)
     Sleep(0.25);
 
     // check x before turning
-    check_x(burger_flip_x + rps_start_x, MINUS);
+    check_x(burger_flip_x, MINUS);
 
     //turn to burger flip
     turn_right(testSpeed, ninetyDegreeCount + 1);
@@ -884,7 +973,7 @@ int main(void)
     move_backward(slowSpeed, 12, 5.0);
 
     //move the ticket
-    turn_right(testSpeed, 70);
+    turn_right_two(testSpeed, 70, 1.0);
 
     //try to enter the robot
     turn_left(testSpeed, 50);
@@ -946,8 +1035,8 @@ int main(void)
 
         bool keepMoving = true;
         while ((left_opt.Value() < 1.5 || middle_opt.Value() < 1.0) && keepMoving){
-            right_motor.SetPercent(testSpeed + 10);
-            left_motor.SetPercent(-testSpeed - 10);
+            right_motor.SetPercent(45);
+            left_motor.SetPercent(-45);
 
             if (left_opt.Value() >= 1.5 || middle_opt.Value() >= 1.0) {
                 right_motor.Stop();
@@ -990,7 +1079,7 @@ int main(void)
         right_motor.SetPercent(-testSpeed);
         left_motor.SetPercent(testSpeed);
 
-        while (RPS.Y() < (twist_y));
+        while (RPS.Y() < (twist_y + rps_start_y));
 
         right_motor.Stop();
         left_motor.Stop();
@@ -1013,8 +1102,8 @@ int main(void)
 
         //Keep running until it detects the black line
 
-        right_motor.SetPercent(testSpeed + 10);
-        left_motor.SetPercent(-testSpeed - 10);
+        right_motor.SetPercent(45);
+        left_motor.SetPercent(-45);
 
         bool keepMoving = true;
         while ((left_opt.Value() < 1.5 || middle_opt.Value() < 1.0) && keepMoving){
@@ -1084,8 +1173,8 @@ int main(void)
         check_heading(119.0);
 
         //Keep running until it detects the black line
-        right_motor.SetPercent(testSpeed + 10);
-        left_motor.SetPercent(-testSpeed - 10);
+        right_motor.SetPercent(45);
+        left_motor.SetPercent(-45);
 
         bool keepMoving = true;
         while ((left_opt.Value() < 1.5 || middle_opt.Value() < 1.0) && keepMoving){
