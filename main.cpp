@@ -38,7 +38,7 @@
 //Define RPS differences because some of the courses are inconsistent for some reason, idk don't blame me
 #define vanilla_y 39.7
 #define twist_y 44.2
-#define chocolate_y 43.0
+#define chocolate_y 42.0
 #define goingDown_x -6
 #define goingDown_heading 88.7
 #define icecream_heading 135.3
@@ -89,7 +89,7 @@ void check_starting_light(float lowerbound, float upperbound){
         LCD.Write(middle_opt.Value());
         LCD.Write("\t");
         LCD.Write(right_opt.Value());
-        LCD.WriteLine("\n\n");
+        LCD.WriteLine("\n");
 
         //Write RPS Values to screen
         LCD.Write(RPS.X());
@@ -97,7 +97,7 @@ void check_starting_light(float lowerbound, float upperbound){
         LCD.Write(RPS.Y());
         LCD.Write("\t");
         LCD.Write(RPS.Heading());
-        LCD.WriteLine("\n\n");
+        LCD.WriteLine("\n");
 
         //Keep the motors from running until a valid light is seen
         left_motor.Stop();
@@ -546,12 +546,21 @@ int main(void)
     //collect burger flip x
     //Final action
     LCD.WriteLine("Press Screen To Collect Burger Flip X");
-    while(!LCD.Touch(&touch_x,&touch_y));
+    while(!LCD.Touch(&touch_x,&touch_y)){
+        LCD.Write("RPS X: ");
+        LCD.Write(RPS.X());
+        LCD.WriteLine("\n");
+        Sleep(1.0);
+    }
     while(LCD.Touch(&touch_x,&touch_y)){
         burger_flip_x = RPS.X();
     }
 
     Sleep(3.0);
+
+    LCD.Write("Burger Flip X: ");
+    LCD.Write(burger_flip_x);
+    LCD.WriteLine("\n");
 
     //Final action
     LCD.WriteLine("RPS & Data Logging Test");
@@ -560,8 +569,8 @@ int main(void)
     while(LCD.Touch(&touch_x,&touch_y));
 
     // get the voltage level and display it to the screen
-    LCD.WriteLine("Battery Voltage: ");
-    LCD.WriteLine(Battery.Voltage());
+    LCD.Write("Battery Voltage: ");
+    LCD.Write(Battery.Voltage());
     LCD.WriteLine("\n");
     Sleep(0.5);
     
@@ -681,9 +690,9 @@ int main(void)
             if (cds.Value() >= 0.3 && cds.Value() <= 0.7){
                 LCD.WriteLine("RED");
 
-                move_prong_arm(-armSpeed, 0.5); //Angle the prong arm so it is able to press he button easier
+                move_prong_arm(-armSpeed, 0.6); //Angle the prong arm so it is able to press he button easier
 
-                move_backward(slowSpeed, 3 5.0); //Move closer to the button
+                move_backward(slowSpeed, 3, 5.0); //Move closer to the button
 
                 right_motor.SetPercent(-20);
                 left_motor.SetPercent(-20);
@@ -708,7 +717,7 @@ int main(void)
                 move_forward(testSpeed, 8.0, 1.5);
 
                 //Angle the prong arm back to original positon
-                move_prong_arm(armSpeed, 0.5);
+                move_prong_arm(armSpeed, 0.6);
 
                 //Turn to the ramp
                 turn_left(testSpeed, ninetyDegreeCount);
@@ -729,7 +738,7 @@ int main(void)
             else {
                 LCD.WriteLine("BLUE");
 
-                move_prong_arm(armSpeed, 0.5); //Angle the prong arm so it is able to press he button easier
+                move_prong_arm(armSpeed, 0.6); //Angle the prong arm so it is able to press he button easier
 
                 move_backward(slowSpeed, 5, 5.0); //Move closer to the button
 
@@ -756,7 +765,7 @@ int main(void)
                 move_forward(testSpeed, 5.0, 1.5);
 
                 //Angle prong arm back to original position
-                move_prong_arm(-armSpeed, 0.5);
+                move_prong_arm(-armSpeed, 0.6);
 
                 //Turn to ramp
                 turn_left(testSpeed, ninetyDegreeCount - 40);
@@ -778,7 +787,7 @@ int main(void)
     else {
         LCD.WriteLine("BLUE");
 
-                move_prong_arm(armSpeed, 0.5); //Angle the prong arm so it is able to press he button easier
+                move_prong_arm(armSpeed, 0.6); //Angle the prong arm so it is able to press he button easier
 
                 move_backward(slowSpeed, 5, 5.0); //Move closer to the button
 
@@ -805,7 +814,7 @@ int main(void)
                 move_forward(testSpeed, 5.0, 1.5);
 
                 //Angle prong arm back to original position
-                move_prong_arm(-armSpeed, 0.5);
+                move_prong_arm(-armSpeed, 0.6);
 
                 //Turn to ramp
                 turn_left(testSpeed, ninetyDegreeCount - 40);
@@ -841,6 +850,8 @@ int main(void)
     // move up ramp
     right_motor.SetPercent(-3 * testSpeed);
     left_motor.SetPercent(3 * testSpeed);
+
+    Sleep(1.5);
 
     while (RPS.Y() < 35.0 + rps_start_y);
 
@@ -965,8 +976,8 @@ int main(void)
 
     float insertSlidingArmTime = TimeNow();
     //angle arm into ticket crevice
-    while ((RPS.Heading() < 107) && (TimeNow() - insertSlidingArmTime < 2.0)){
-        check_heading(107.0);
+    while ((RPS.Heading() < 106) && (TimeNow() - insertSlidingArmTime < 2.0)){
+        check_heading(106.0);
     }
 
     //move more into crevice
