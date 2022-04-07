@@ -36,8 +36,8 @@
 #define MINUS 1
 
 //Define RPS differences because some of the courses are inconsistent for some reason, idk don't blame me
-#define vanilla_y 39.7
-#define twist_y 44.2
+#define vanilla_y 39.3
+#define twist_y 44.8
 #define chocolate_y 42.0
 #define goingDown_x -6
 #define goingDown_heading 88.7
@@ -594,12 +594,12 @@ int main(void)
     check_y(first_turn_y + rps_start_y, MINUS);
 
     //turn to go to trash can
-    turn_left(testSpeed, 100);
+    turn_left(testSpeed, 90);
 
     check_heading(first_turn_heading);
 
-    right_motor.SetPercent(testSpeed + 10);
-    left_motor.SetPercent(-testSpeed - 10);
+    right_motor.SetPercent(2 * testSpeed);
+    left_motor.SetPercent(-2 * testSpeed);
 
     //Correct position against wall
     while (bump_switch1.Value() == 1 || bump_switch2.Value() == 1);
@@ -621,8 +621,8 @@ int main(void)
     check_heading(tray_turn_heading);
 
     //Keep moving until at least one of the bump switches is against the trash can
-    right_motor.SetPercent(testSpeed);
-    left_motor.SetPercent(-testSpeed);
+    right_motor.SetPercent(2 * testSpeed);
+    left_motor.SetPercent(-2 * testSpeed);
 
     float dropBucket = TimeNow();
     while ((bump_switch1.Value() == 1 && bump_switch2.Value() == 1) && (TimeNow() - dropBucket < 3.0));
@@ -674,9 +674,10 @@ int main(void)
         }
     }
 
-    check_y(jukebox_light_y + rps_start_y, MINUS);
-
     check_heading(before_color_heading);
+
+    //check_y(jukebox_light_y + rps_start_y, MINUS);
+    pulse_forward(PULSE_POWER, 1.5 * PULSE_TIME);
 
     //check whether the cds light is red or blue and stop
     if (cds.Value() >= 0.3 && cds.Value() <= 2.0) {
@@ -687,10 +688,10 @@ int main(void)
             Sleep(0.25);
 
             //Check if the light was red
-            if (cds.Value() >= 0.3 && cds.Value() <= 0.7){
+            if (cds.Value() >= 0.3 && cds.Value() <= 0.6){
                 LCD.WriteLine("RED");
 
-                move_prong_arm(-armSpeed, 0.6); //Angle the prong arm so it is able to press he button easier
+                move_prong_arm(-2 * armSpeed, 0.2); //Angle the prong arm so it is able to press he button easier
 
                 move_backward(slowSpeed, 3, 5.0); //Move closer to the button
 
@@ -717,7 +718,7 @@ int main(void)
                 move_forward(testSpeed, 8.0, 1.5);
 
                 //Angle the prong arm back to original positon
-                move_prong_arm(armSpeed, 0.6);
+                move_prong_arm(2 * armSpeed, 0.2);
 
                 //Turn to the ramp
                 turn_left(testSpeed, ninetyDegreeCount);
@@ -738,7 +739,7 @@ int main(void)
             else {
                 LCD.WriteLine("BLUE");
 
-                move_prong_arm(armSpeed, 0.6); //Angle the prong arm so it is able to press he button easier
+                move_prong_arm(2 * armSpeed, 0.2); //Angle the prong arm so it is able to press he button easier
 
                 move_backward(slowSpeed, 5, 5.0); //Move closer to the button
 
@@ -765,7 +766,7 @@ int main(void)
                 move_forward(testSpeed, 5.0, 1.5);
 
                 //Angle prong arm back to original position
-                move_prong_arm(-armSpeed, 0.6);
+                move_prong_arm(-2 * armSpeed, 0.2);
 
                 //Turn to ramp
                 turn_left(testSpeed, ninetyDegreeCount - 40);
@@ -783,54 +784,6 @@ int main(void)
                 //check x value before turning
                 check_x(turn_ramp_1_x + rps_start_x, PLUS);
             }
-    }
-    else {
-        LCD.WriteLine("BLUE");
-
-                move_prong_arm(armSpeed, 0.6); //Angle the prong arm so it is able to press he button easier
-
-                move_backward(slowSpeed, 5, 5.0); //Move closer to the button
-
-                right_motor.SetPercent(20);
-                left_motor.SetPercent(20);
-                keepMoving = true;
-
-                //Slowly move forward until the black lines in front of the jukebox buttons are detected
-                while ((middle_opt.Value() < 0.7) && keepMoving){
-                if (middle_opt.Value() >= 0.7) {
-                    right_motor.Stop();
-                    left_motor.Stop();
-
-                    Sleep(0.25);
-
-                    keepMoving = false;
-                    }
-                }
-                
-                //Press the button
-                move_backward(20, 10.0, 1.5);
-
-                //Back away from button
-                move_forward(testSpeed, 5.0, 1.5);
-
-                //Angle prong arm back to original position
-                move_prong_arm(-armSpeed, 0.6);
-
-                //Turn to ramp
-                turn_left(testSpeed, ninetyDegreeCount - 40);
-
-                Sleep(0.25);
-
-                //check heading before moving towards ramp
-                check_heading(turn_ramp_1_heading);
-
-                //move towards ramp
-                move_backward(testSpeed + 10, 160, 5.0);
-
-                Sleep(0.25);
-
-                //check x value before turning
-                check_x(turn_ramp_1_x + rps_start_x, PLUS);
     }
 
 
@@ -873,8 +826,8 @@ int main(void)
 
     //check_heading(burger_flip_1_heading);
     
-    right_motor.SetPercent(testSpeed + 10);
-    left_motor.SetPercent(-testSpeed - 10);
+    right_motor.SetPercent(2 * testSpeed);
+    left_motor.SetPercent(-2 * testSpeed);
 
     //Correct position against wall
     while (bump_switch1.Value() == 1 || bump_switch2.Value() == 1);
@@ -922,19 +875,27 @@ int main(void)
     Sleep(0.25);
     
     //Continuously adjust the robot so that the prong arm fits into the wheel holes
-    check_heading_two(burger_flip_2_heading);
+    // check_heading_two(burger_flip_2_heading);
+    // Sleep(0.25);
+    // pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
+    // Sleep(0.25);
+    // check_heading_two(burger_flip_2_heading);
+    // Sleep(0.25);
+    // pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
+    // Sleep(0.25);
+    // check_heading_two(burger_flip_2_heading);
+    // Sleep(0.25);
+    // pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
+    // Sleep(0.25);
+    // check_heading_two(burger_flip_2_heading);
+    // Sleep(0.25);
+    // pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
+    // Sleep(0.25);
+    pulse_counterclockwise(-PULSE_POWER, PULSE_TIME);
     Sleep(0.25);
     pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
     Sleep(0.25);
-    check_heading_two(burger_flip_2_heading);
-    Sleep(0.25);
-    pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
-    Sleep(0.25);
-    check_heading_two(burger_flip_2_heading);
-    Sleep(0.25);
-    pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
-    Sleep(0.25);
-    check_heading_two(burger_flip_2_heading);
+    pulse_counterclockwise(-PULSE_POWER, PULSE_TIME);
     Sleep(0.25);
     pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
     Sleep(0.25);
@@ -1003,8 +964,8 @@ int main(void)
     //face the wall
     turn_right(testSpeed, ninetyDegreeCount);
 
-    right_motor.SetPercent(testSpeed);
-    left_motor.SetPercent(-testSpeed);
+    right_motor.SetPercent(2 * testSpeed);
+    left_motor.SetPercent(-2 * testSpeed);
 
     //Correct position against wall
     while (bump_switch1.Value() == 1 || bump_switch2.Value() == 1);
@@ -1143,7 +1104,7 @@ int main(void)
         move_bucket_arm(armSpeed, 1.5); //move arm back down little
 
         //back up from lever
-        move_backward(testSpeed, 180, 5.0); //move back from lever
+        move_backward(testSpeed, 210, 5.0); //move back from lever
         Sleep(0.25);
         if (RPS.X() < goingDown_x + rps_start_x){
             check_x(goingDown_x + rps_start_x, PLUS); //check if robot is aligned with ramp
@@ -1207,6 +1168,7 @@ int main(void)
         Sleep(1.0);
         move_bucket_arm(armSpeed, 0.5); //move arm down
         Sleep(1.0);
+        pulse_counterclockwise(-PULSE_POWER, 2 * PULSE_TIME);
         move_forward(slowSpeed, 12, 5.0); //move back into lever
         Sleep(2.0);
         move_bucket_arm(-4 * armSpeed, 1.0); //move arm back up
@@ -1236,8 +1198,10 @@ int main(void)
     check_heading(goingDown_heading); //check the angle of the robot
 
     //move down ramp
-    right_motor.SetPercent(-2 * testSpeed);
-    left_motor.SetPercent(2 * testSpeed);
+    right_motor.SetPercent(-3 * testSpeed);
+    left_motor.SetPercent(3 * testSpeed);
+
+    Sleep(1.25);
 
     while (RPS.Y() > (downRamp_y + 3.0 + rps_start_y));
 
@@ -1246,10 +1210,10 @@ int main(void)
 
     Sleep(0.25);
     if (RPS.Y() < downRamp_y + rps_start_y) {
-        check_y(downRamp_y + rps_start_y, MINUS); //check the y coordinate after going down the ramp
+        check_y(downRamp_y + rps_start_y, PLUS); //check the y coordinate after going down the ramp
     }
     else{
-        check_y(downRamp_y + rps_start_y, PLUS); //check the y coordinate after going down the ramp
+        check_y(downRamp_y + rps_start_y, MINUS); //check the y coordinate after going down the ramp
     }
 
     //Final button
