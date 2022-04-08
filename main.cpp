@@ -578,7 +578,7 @@ int main(void)
     float rps_start_y = RPS.Y();
 
     //Check if the starting light is not red
-    check_starting_light(0.25, 0.7);
+    check_starting_light(0.2, 1.0);
     
     /*
     *TRAY DUMP
@@ -591,7 +591,12 @@ int main(void)
     move_forward(2 * testSpeed, 200, 5.0); //move forward from starting light
     Sleep(0.25);
     
-    check_y(first_turn_y + rps_start_y, MINUS);
+    if (RPS.Y() > first_turn_y + rps_start_y) {
+        check_y(first_turn_y + rps_start_y, MINUS); //check the y coordinate after going down the ramp
+    }
+    else{
+        check_y(first_turn_y + rps_start_y, PLUS); //check the y coordinate after going down the ramp
+    }
 
     //turn to go to trash can
     turn_left(testSpeed, 90);
@@ -662,9 +667,9 @@ int main(void)
     left_motor.SetPercent(testSpeed);
 
     bool keepMoving = true;
-    while ((cds.Value() < 0.3 || cds.Value() > 2.0) && keepMoving){
+    while ((cds.Value() < 0.3 || cds.Value() > 2.6) && keepMoving){
 
-        if ((cds.Value() >= 0.3) && (cds.Value() <= 2.0)) {
+        if ((cds.Value() >= 0.3) && (cds.Value() <= 2.6)) {
             right_motor.Stop();
             left_motor.Stop();
 
@@ -674,13 +679,14 @@ int main(void)
         }
     }
 
+    Sleep(0.25);
     check_heading(before_color_heading);
 
     //check_y(jukebox_light_y + rps_start_y, MINUS);
     pulse_forward(PULSE_POWER, 1.5 * PULSE_TIME);
 
     //check whether the cds light is red or blue and stop
-    if (cds.Value() >= 0.3 && cds.Value() <= 2.0) {
+    if (cds.Value() >= 0.2 && cds.Value() <= 2.0) {
             left_motor.Stop();
             right_motor.Stop();
             LCD.WriteLine("Light Detected");
@@ -688,7 +694,7 @@ int main(void)
             Sleep(0.25);
 
             //Check if the light was red
-            if (cds.Value() >= 0.3 && cds.Value() <= 0.6){
+            if (cds.Value() >= 0.2 && cds.Value() <= 1.2){
                 LCD.WriteLine("RED");
 
                 move_prong_arm(-2 * armSpeed, 0.2); //Angle the prong arm so it is able to press he button easier
@@ -741,7 +747,7 @@ int main(void)
 
                 move_prong_arm(2 * armSpeed, 0.2); //Angle the prong arm so it is able to press he button easier
 
-                move_backward(slowSpeed, 5, 5.0); //Move closer to the button
+                move_backward(slowSpeed, 2, 5.0); //Move closer to the button
 
                 right_motor.SetPercent(20);
                 left_motor.SetPercent(20);
@@ -849,8 +855,8 @@ int main(void)
     //check heading
     check_heading(burger_flip_2_heading);
 
-    right_motor.SetPercent(-testSpeed);
-    left_motor.SetPercent(testSpeed);
+    right_motor.SetPercent(-35);
+    left_motor.SetPercent(35);
 
     //Drive until the optosensors sees the line in front of the burger flip
     bool moveBurgerLine = true;
@@ -874,23 +880,11 @@ int main(void)
     move_backward(20, 4.0, 1.0);
     Sleep(0.25);
     
-    //Continuously adjust the robot so that the prong arm fits into the wheel holes
-    // check_heading_two(burger_flip_2_heading);
-    // Sleep(0.25);
-    // pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
-    // Sleep(0.25);
-    // check_heading_two(burger_flip_2_heading);
-    // Sleep(0.25);
-    // pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
-    // Sleep(0.25);
-    // check_heading_two(burger_flip_2_heading);
-    // Sleep(0.25);
-    // pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
-    // Sleep(0.25);
-    // check_heading_two(burger_flip_2_heading);
-    // Sleep(0.25);
-    // pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
-    // Sleep(0.25);
+    //Continuously adjust the robot so that the prong arm fits into the wheel hole
+    pulse_counterclockwise(-PULSE_POWER, PULSE_TIME);
+    Sleep(0.25);
+    pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
+    Sleep(0.25);
     pulse_counterclockwise(-PULSE_POWER, PULSE_TIME);
     Sleep(0.25);
     pulse_forward(PULSE_POWER, 2 * PULSE_TIME);
@@ -945,7 +939,7 @@ int main(void)
     move_backward(slowSpeed, 12, 5.0);
 
     //move the ticket
-    turn_right_two(testSpeed, 70, 1.0);
+    turn_right_two(testSpeed, 75, 1.0);
 
     //try to enter the robot
     turn_left(testSpeed, 50);
@@ -1033,7 +1027,7 @@ int main(void)
         move_bucket_arm(armSpeed, 1.5); //move arm back down little
 
         //back up from lever
-        move_backward(testSpeed, 205, 5.0); //move back from lever
+        move_backward(testSpeed, 230, 5.0); //move back from lever
         Sleep(0.25);
         if (RPS.X() < goingDown_x + rps_start_x){
             check_x(goingDown_x + rps_start_x, PLUS); //check if robot is aligned with ramp
@@ -1175,7 +1169,7 @@ int main(void)
         move_bucket_arm(armSpeed, 1.5); //move arm back down little
 
         //back up from lever
-        move_backward(testSpeed, 205, 5.0); //move back from lever
+        move_backward(testSpeed, 215, 5.0); //move back from lever
         Sleep(0.25);
         if (RPS.X() < goingDown_x + rps_start_x){
             check_x(goingDown_x + rps_start_x, PLUS); //check if robot is aligned with ramp
@@ -1198,29 +1192,29 @@ int main(void)
     check_heading(goingDown_heading); //check the angle of the robot
 
     //move down ramp
-    right_motor.SetPercent(-3 * testSpeed);
-    left_motor.SetPercent(3 * testSpeed);
+    right_motor.SetPercent(-3 * testSpeed + 10);
+    left_motor.SetPercent(3 * testSpeed - 10);
 
-    Sleep(1.25);
+    Sleep(1.00);
 
-    while (RPS.Y() > (downRamp_y + 3.0 + rps_start_y));
+    while (RPS.Y() > (downRamp_y + 5.0 + rps_start_y));
 
     right_motor.Stop();
     left_motor.Stop();   
 
     Sleep(0.25);
     if (RPS.Y() < downRamp_y + rps_start_y) {
-        check_y(downRamp_y + rps_start_y, PLUS); //check the y coordinate after going down the ramp
+        check_y(downRamp_y + rps_start_y, MINUS); //check the y coordinate after going down the ramp
     }
     else{
-        check_y(downRamp_y + rps_start_y, MINUS); //check the y coordinate after going down the ramp
+        check_y(downRamp_y + rps_start_y, PLUS); //check the y coordinate after going down the ramp
     }
 
     //Final button
     turn_left(testSpeed, 100); //face the final button
     Sleep(1.0);
     check_heading(finalButton_heading); //Check if the robot is aligned with the button
-    move_backward(testSpeed + 10, 500, 5.0); //Ram that shit into the button
+    move_backward(50, 500, 5.0); //Ram that shit into the button
 
     //Unreachable code
     Sleep(2.0);
