@@ -812,8 +812,6 @@ int main(void)
 
     Sleep(1.4);
 
-    //while (RPS.Y() < 35.0 + rps_start_y);
-
     right_motor.Stop();
     left_motor.Stop();
 
